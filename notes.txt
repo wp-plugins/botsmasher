@@ -1,0 +1,6 @@
+BotSmasher thoughts
+
+ - Take-up: set up with comments, with registration, see about automatic integration with existing plug-ins (probably better via an API)
+ - Incorporate contact form into plug-in? Simultaneous release of contact form that interacts with it? Good to have a contact form we can plug as accessible, too -- added bonus -- how customizable to make it? 
+ - Flood control - more than x form checks in x seconds/minutes, flag all as spam for next 5 mins., send flood notice?
+ - Authentication?
