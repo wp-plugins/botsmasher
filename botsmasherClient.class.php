@@ -63,20 +63,20 @@ class botsmasherClient {
 	
 		$this -> opts['key'] = $this -> apiKey;
 
-        if (TRUE == $printInfo) {
+        if ( TRUE == $printInfo ) {
             echo '<pre>';
             var_dump($this -> opts);
             echo '</pre>';
         }
 
-        if (FALSE == $this -> validateOpts()) {
+        if ( FALSE == $this -> validateOpts() ) {
             if (TRUE == $printInfo) {
                 echo 'INVALID OPTS';
             }
             return FALSE;
         }
 		
-		$args = array( 'method'=>'POST', 'body'=>$this -> opts, 'headers'=>'', 'sslverify'=>false );
+		$args = array( 'method'=>'POST', 'body' => $this -> opts, 'headers' => '', 'sslverify' => false, 'timeout' => 30 );
 		$result = wp_remote_post( $this -> apiURL, $args );
 		
 		if (TRUE == $printInfo) {
@@ -91,11 +91,8 @@ class botsmasherClient {
 				$body = $result['body'];
 			} 
 		} else {
-			if (TRUE == $printInfo) {
-				echo '<pre>';
-				var_dump( $result );
-				echo '</pre>';
-			}			
+			bs_handle_exception( $result, 'is_wp_error' );
+			$body = false;
 		}
         //the results
         $this -> response = $body;
@@ -139,7 +136,7 @@ class botsmasherClient {
                 throw new Exception($msg);
             }
         } catch (Exception $e) {
-			bs_handle_exception( $e );
+			bs_handle_exception( $e, $this->response );
             return FALSE;
         }
         return $array;
@@ -174,7 +171,7 @@ class botsmasherClient {
                 }
             }
         } catch (Exception $e) {
-			bs_handle_exception( $e );
+			bs_handle_exception( $e, $this->response );
 			return null;
         }
     }	

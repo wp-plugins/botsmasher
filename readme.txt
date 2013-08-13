@@ -4,7 +4,7 @@ Donate link: http://www.joedolson.com/donate.php
 Tags: botsmasher, spam, anti-spam, captcha, comments, registration, contact form
 Requires at least: 3.4.2
 Tested up to: 3.6.0
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPLv2 or later
 
 BotSmasher stops spam by checking comments and registrations against the BotSmasher API. 
@@ -27,14 +27,34 @@ New registrations are run through BotSmasher. Anybody flagged by BotSmasher will
 
 BotSmasher includes an integrated and accessible contact form with basic customization options. The contact form shortcode is documented on the settings page, but can also be configured via the widget tool. 
 
+= Translations =
+
+Available languages (in order of completeness):
+There aren't any yet!
+
+Visit the [BotSmasher translations site](http://translate.joedolson.com/projects/botsmasher) to help out!
+
+Translating my plug-ins is always appreciated. Visit <a href="http://translate.joedolson.com">my translations site</a> to start getting your language into shape!
+
+<a href="http://www.joedolson.com/articles/translator-credits/">Translator Credits</a>
+
 == Installation ==
 
 1. Download the plugin's zip file, extract the contents, and upload them to your wp-content/plugins folder.
 2. Login to your WordPress dashboard, click "Plugins", and activate BotSmasher.
 3. At http://www.botsmasher.com, register to get an API key.
-2. Add your API key on the Settings > BotSmasher screen.
+4. Add your API key on the Settings > BotSmasher screen.
 
 == Changelog ==
+
+= 1.0.2 =
+
+* Fixed FAQ link in support request form.
+* Fixed support form nonce
+* Lengthened timeout period on HTTP requests
+* Added WP errors to error log.
+* Ability to enable debugging.
+* Added botsmasher.pot to download. 
 
 = 1.0.1 =
 

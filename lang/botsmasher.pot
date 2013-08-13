@@ -1,0 +1,319 @@
+# Copyright (C) 2013 BotSmasher
+# This file is distributed under the same license as the BotSmasher package.
+msgid ""
+msgstr ""
+"Project-Id-Version: BotSmasher 1.0.1\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/tag/botsmasher\n"
+"POT-Creation-Date: 2013-08-13 16:02:25+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2013-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+
+#: botsmasher.php:88
+msgid "BotSmasher Settings"
+msgstr ""
+
+#: botsmasher.php:159
+msgid "BotSmasher Settings Updated"
+msgstr ""
+
+#: botsmasher.php:180
+msgid "You must <a href='%s'>enter a BotSmasher API key</a> to use BotSmasher."
+msgstr ""
+
+#: botsmasher.php:184
+msgid "BotSmasher: Settings"
+msgstr ""
+
+#: botsmasher.php:189 botsmasher.php:193
+msgid "BotSmasher Options"
+msgstr ""
+
+#: botsmasher.php:195
+msgid "BotSmasher API Key"
+msgstr ""
+
+#: botsmasher.php:196
+msgid "Required Label Text"
+msgstr ""
+
+#: botsmasher.php:197
+msgid "Send HTML Email"
+msgstr ""
+
+#: botsmasher.php:198
+msgid "Filter Comments"
+msgstr ""
+
+#: botsmasher.php:199
+msgid "Filter Registrations"
+msgstr ""
+
+#: botsmasher.php:208
+msgid "Update Settings"
+msgstr ""
+
+#: botsmasher.php:213
+msgid "Get Plug-in Support"
+msgstr ""
+
+#: botsmasher.php:226
+msgid "Support this Plugin"
+msgstr ""
+
+#: botsmasher.php:233
+msgid ""
+"If you've found BotSmasher useful, then please consider <a href='http://"
+"wordpress.org/extend/plugins/botsmasher/'>rating it five stars</a>, <a "
+"href='http://www.joedolson.com/donate.php'>making a donation</a>, or <a "
+"href='http://translate.joedolson.com/projects/botsmasher'>helping with "
+"translation</a>."
+msgstr ""
+
+#: botsmasher.php:235
+msgid ""
+"<a href=\"http://www.joedolson.com/donate.php\">Make a donation today!</a> "
+"Every donation counts - donate $5, $20, or $100 and help me keep this plug-"
+"in running!"
+msgstr ""
+
+#: botsmasher.php:250
+msgid "Total Checks: %1$d<br />Bots Smashed: %2$d<br />Today's Checks: %3$d"
+msgstr ""
+
+#: botsmasher.php:259
+msgid "BotSmasher API Errors (Last 20)"
+msgstr ""
+
+#: botsmasher.php:271
+msgid ""
+"You have reached your BotSmasher API check limit for today. <a href=\"%s"
+"\">Raise your limit!</a>"
+msgstr ""
+
+#: botsmasher.php:277
+msgid "No errors reported."
+msgstr ""
+
+#: botsmasher.php:369
+msgid ""
+"Please read the FAQ and other Help documents before making a support request."
+msgstr ""
+
+#: botsmasher.php:371
+msgid "Please describe your problem. I'm not psychic."
+msgstr ""
+
+#: botsmasher.php:375
+msgid ""
+"Thank you for supporting the continuing development of this plug-in! I'll "
+"get back to you as soon as I can."
+msgstr ""
+
+#: botsmasher.php:377
+msgid ""
+"I cannot provide free support, but will treat your request as a bug report, "
+"and will incorporate any permanent solutions I discover into the plug-in."
+msgstr ""
+
+#: botsmasher.php:389
+msgid ""
+"<strong>Please note</strong>: I do keep records of those who have donated, "
+"but if your donation came from somebody other than your account at this web "
+"site, you must note this in your message."
+msgstr ""
+
+#: botsmasher.php:393
+msgid "From:"
+msgstr ""
+
+#: botsmasher.php:396
+msgid ""
+"I have read <a href=\"%1$s\">the FAQ for this plug-in</a> <span>(required)</"
+"span>"
+msgstr ""
+
+#: botsmasher.php:399
+msgid ""
+"I have <a href=\"%1$s\">made a donation to help support this plug-in</a>"
+msgstr ""
+
+#: botsmasher.php:402
+msgid "Support Request:"
+msgstr ""
+
+#: botsmasher.php:405
+msgid "Send Support Request"
+msgstr ""
+
+#: botsmasher.php:408
+msgid ""
+"The following additional information will be sent with your support request:"
+msgstr ""
+
+#. #-#-#-#-#  plugin.pot (BotSmasher 1.0.1)  #-#-#-#-#
+#. Plugin Name of the plugin/theme
+#: bs-comments.php:61
+msgid "BotSmasher"
+msgstr ""
+
+#: bs-comments.php:69
+msgid "Flagged by BotSmasher"
+msgstr ""
+
+#: bs-comments.php:71
+msgid "Flagged by you as a false positive"
+msgstr ""
+
+#: bs-comments.php:73
+msgid "Flagged by you as spam"
+msgstr ""
+
+#: bs-contacts.php:29
+msgid ""
+"Field count and label count does not match. You must have a label specified "
+"for all fields."
+msgstr ""
+
+#: bs-contacts.php:47 bs-contacts.php:53 bs-contacts.php:130
+msgid "%s is a required field."
+msgstr ""
+
+#: bs-contacts.php:181
+msgid ""
+"BotSmasher thinks you're a spammer. Please contact us if you're a real "
+"person!"
+msgstr ""
+
+#: bs-contacts.php:300
+msgid "BotSmasher Contact Form"
+msgstr ""
+
+#: bs-contacts.php:302
+msgid "Quick Contact"
+msgstr ""
+
+#: bs-contacts.php:352
+msgid "Title"
+msgstr ""
+
+#: bs-contacts.php:356
+msgid "Recipient"
+msgstr ""
+
+#: bs-contacts.php:360
+msgid "Submit Text"
+msgstr ""
+
+#: bs-contacts.php:364
+msgid "Email Subject"
+msgstr ""
+
+#: bs-contacts.php:366 bs-contacts.php:376
+msgid "Available template tags: "
+msgstr ""
+
+#: bs-contacts.php:370
+msgid "Thank you message"
+msgstr ""
+
+#: bs-contacts.php:374
+msgid "Message Template"
+msgstr ""
+
+#: bs-contacts.php:379
+msgid "BotSmasher Form Fields"
+msgstr ""
+
+#: bs-contacts.php:382
+msgid "Name field label"
+msgstr ""
+
+#: bs-contacts.php:386
+msgid "Email field label"
+msgstr ""
+
+#: bs-contacts.php:393 bs-contacts.php:423
+msgid "Label"
+msgstr ""
+
+#: bs-contacts.php:394 bs-contacts.php:425
+msgid "Required"
+msgstr ""
+
+#: bs-contacts.php:395 bs-contacts.php:427
+msgid "Type"
+msgstr ""
+
+#: bs-contacts.php:396
+msgid "Order"
+msgstr ""
+
+#: bs-contacts.php:416
+msgid "Up"
+msgstr ""
+
+#: bs-contacts.php:416
+msgid "Down"
+msgstr ""
+
+#: bs-registrations.php:17
+msgid ""
+"<strong>ERROR</strong>: BotSmasher has flagged you as a spammer. Please "
+"contact the site owner!"
+msgstr ""
+
+#: bs-registrations.php:32
+msgid "New user registration on your site %s:"
+msgstr ""
+
+#: bs-registrations.php:33 bs-registrations.php:42
+msgid "Username: %s"
+msgstr ""
+
+#: bs-registrations.php:34
+msgid "E-mail: %s"
+msgstr ""
+
+#: bs-registrations.php:35
+msgid "Flag as spam? %s"
+msgstr ""
+
+#: bs-registrations.php:37
+msgid "[%s] New User Registration"
+msgstr ""
+
+#: bs-registrations.php:43
+msgid "Password: %s"
+msgstr ""
+
+#: bs-registrations.php:46
+msgid "[%s] Your username and password"
+msgstr ""
+
+#: bs-registrations.php:78
+msgid "User blacklisted at BotSmasher <a href=\"%s\">Delete user</a>"
+msgstr ""
+
+#: bs-registrations.php:80
+msgid "Could not blacklist user at BotSmasher"
+msgstr ""
+
+#. Plugin URI of the plugin/theme
+msgid "http://www.joedolson.com/articles/botsmasher/"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid "BotSmasher smashes bots."
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "Joe Dolson"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "http://www.joedolson.com/"
+msgstr ""

@@ -3,7 +3,7 @@
 Plugin Name: BotSmasher
 Plugin URI: http://www.joedolson.com/articles/botsmasher/
 Description: BotSmasher smashes bots. 
-Version: 1.0.1
+Version: 1.0.2
 Author: Joe Dolson
 Author URI: http://www.joedolson.com/
 
@@ -29,8 +29,12 @@ register_activation_hook(__FILE__,'bs_install');
 add_action('admin_menu', 'add_bs_admin_menu');
 load_plugin_textdomain( 'botsmasher',false, dirname( plugin_basename( __FILE__ ) ) . '/lang' );
 
+//define( 'BS_DEBUG_TO', 'debug@joedolson.com' ); // use this to send debugging to Joe. Please, only if you contacted me first!
+define( 'BS_DEBUG_TO', get_option( 'admin_email' ) );
+define( 'BS_DEBUGGING', false );
+
 $bs_api_url = 'https://www.botsmasher.com/api/index.php';
-$bs_version = '1.0.0'; 
+$bs_version = '1.0.2'; 
 
 if ( !class_exists('botsmasherClient') ) {
 	require_once( plugin_dir_path(__FILE__).'botsmasherClient.class.php' );
@@ -357,7 +361,7 @@ $plugins_string
 ";
 	if ( isset($_POST['wpt_support']) ) {
 		$nonce=$_REQUEST['_wpnonce'];
-		if (! wp_verify_nonce($nonce,'botsmasher-nonce') ) die("Security check failed");	
+		if (! wp_verify_nonce($nonce,'bs-nonce') ) die("Security check failed");	
 		$request = ( !empty($_POST['support_request']) )?stripslashes($_POST['support_request']):false;
 		$has_donated = ( $_POST['has_donated'] == 'on')?"Donor":"No donation";
 		$has_read_faq = ( $_POST['has_read_faq'] == 'on')?"Read FAQ":false;
@@ -382,7 +386,7 @@ $plugins_string
 
 	echo "
 	<form method='post' action='$admin_url'>
-		<div><input type='hidden' name='_wpnonce' value='".wp_create_nonce('botsmasher-nonce')."' /></div>
+		<div><input type='hidden' name='_wpnonce' value='".wp_create_nonce('bs-nonce')."' /></div>
 		<div>";
 		echo "
 		<p>".
@@ -393,7 +397,7 @@ $plugins_string
 		<code>".__('From:','botsmasher')." \"$current_user->display_name\" &lt;$current_user->user_email&gt;</code>
 		</p>
 		<p>
-		<input type='checkbox' name='has_read_faq' id='has_read_faq' value='on' /> <label for='has_read_faq'>".sprintf(__('I have read <a href="%1$s">the FAQ for this plug-in</a> <span>(required)</span>','botsmasher'),'http://www.joedolson.com/articles/botsmasher/faqs/')."</label>
+		<input type='checkbox' name='has_read_faq' id='has_read_faq' value='on' /> <label for='has_read_faq'>".sprintf(__('I have read <a href="%1$s">the FAQ for this plug-in</a> <span>(required)</span>','botsmasher'),'http://wordpress.org/plugins/botsmasher/faq/')."</label>
         </p>
         <p>
         <input type='checkbox' name='has_donated' id='has_donated' value='on' /> <label for='has_donated'>".sprintf(__('I have <a href="%1$s">made a donation to help support this plug-in</a>','botsmasher'),'http://www.joedolson.com/donate.php')."</label>
@@ -414,15 +418,22 @@ $plugins_string
 	</form>";
 }
 
-function bs_handle_exception( $e ) {
-	//wp_mail( 'joe@joedolson.com', 'Handled Exception', print_r( $e, 1 ) );
+function bs_handle_exception( $e, $response ) {
+	if ( defined ( 'BS_DEBUGGING' ) && BS_DEBUGGING == true ) {
+		wp_mail( BS_DEBUG_TO, 'BotSmasher: Handled Exception', print_r( $e, 1 )."\n\n".print_r( $response, 1 ) );
+	}
 	$exceptions = get_option( 'bs_exceptions' );
 	if ( !is_array( $exceptions ) ) {
 		$exceptions = array();
 	}
 	if ( count( $exceptions ) > 20 ) { // only track the latest 20 issues.
 		array_shift( $exceptions );
+	}	
+	if ( $response == 'is_wp_error' ) {
+		$message = "BS: ".$e->get_error_message();
+	} else {
+		$message = "WP: ".$e->getMessage();
 	}
-	$exceptions[] = array( 'date'=>current_time( 'timestamp' ), 'message'=> $e->getMessage() );
+	$exceptions[] = array( 'date'=>current_time( 'timestamp' ), 'message'=> $message );
 	update_option( 'bs_exceptions', $exceptions );
 }
