@@ -3,7 +3,7 @@
 Plugin Name: BotSmasher
 Plugin URI: http://www.joedolson.com/articles/botsmasher/
 Description: BotSmasher smashes bots. 
-Version: 1.0.2
+Version: 1.0.3
 Author: Joe Dolson
 Author URI: http://www.joedolson.com/
 
@@ -34,7 +34,7 @@ define( 'BS_DEBUG_TO', get_option( 'admin_email' ) );
 define( 'BS_DEBUGGING', false );
 
 $bs_api_url = 'https://www.botsmasher.com/api/index.php';
-$bs_version = '1.0.2'; 
+$bs_version = '1.0.3'; 
 
 if ( !class_exists('botsmasherClient') ) {
 	require_once( plugin_dir_path(__FILE__).'botsmasherClient.class.php' );
@@ -181,7 +181,7 @@ function bs_admin_menu() { ?>
 <?php echo bs_update_settings(); ?>
 <?php $bs_options = get_option( 'bs_options' );
 if ( !$options || !isset($options['bs_api_key'] ) || $options['bs_api_key'] == '' ) {
-	$message = sprintf(__("You must <a href='%s'>enter a BotSmasher API key</a> to use BotSmasher.", 'my-calendar-submissions'), admin_url('options-general.php?page=botsmasher/botsmasher.php'));
+	$message = sprintf(__("You must <a href='%s'>enter a BotSmasher API key</a> to use BotSmasher.", 'botsmasher'), admin_url('options-general.php?page=botsmasher/botsmasher.php'));
 	add_action('admin_notices', create_function( '', "if ( ! current_user_can( 'manage_options' ) ) { return; } else { echo \"<div class='error'><p>$message</p></div>\";}" ) );
 } ?>
 <div class="wrap">
@@ -196,13 +196,11 @@ if ( !$options || !isset($options['bs_api_key'] ) || $options['bs_api_key'] == '
 				<fieldset>
 					<legend><?php _e('BotSmasher Options','botsmasher'); ?></legend>
 					<ul>
-						<li><label for="bs_api_key"><?php _e('BotSmasher API Key','botsmasher'); ?></label> <input type="text" id="bs_api_key" name="bs_api_key" class="widefat" value="<?php echo esc_attr( $bs_options['bs_api_key'] ); ?>" /></li>
+						<li><label for="bs_api_key"><?php _e('BotSmasher API Key','botsmasher'); ?></label> (<span id="bsak_label"><a href="http://www.botsmasher.com/register.php"><?php _e('Get an API key','botsmasher'); ?></a>) <input type="text" id="bs_api_key" name="bs_api_key" class="widefat" aria-labelledby="bs_api_key bsak_label" value="<?php echo esc_attr( $bs_options['bs_api_key'] ); ?>" /></li>
 						<li><label for="bs_required_label"><?php _e('Required Label Text','botsmasher'); ?></label> <input type="text" id="bs_required_label" name="bs_required_label" class="widefat" value="<?php echo esc_attr( $bs_options['bs_required_label'] ); ?>" /></li>
 						<li><input type="checkbox" id="bs_html_email" name="bs_html_email" <?php if ( $bs_options['bs_html_email'] == "on") { echo 'checked="checked" '; } ?>/> <label for="bs_html_email"><?php _e('Send HTML Email','botsmasher'); ?></label></li>
 						<li><input type="checkbox" id="bs_filter_comments" name="bs_filter_comments" <?php if ( $bs_options['bs_filter_comments'] == "on") { echo 'checked="checked" '; } ?>/> <label for="bs_filter_comments"><?php _e('Filter Comments','botsmasher'); ?></label></li>
 						<li><input type="checkbox" id="bs_filter_registrations" name="bs_filter_registrations" <?php if ( $bs_options['bs_filter_registrations'] == "on") { echo 'checked="checked" '; } ?>/> <label for="bs_filter_registrations"><?php _e('Filter Registrations','botsmasher'); ?></label></li>
-						
-						
 					</ul>
 				</fieldset>
 					<p>
@@ -213,12 +211,53 @@ if ( !$options || !isset($options['bs_api_key'] ) || $options['bs_api_key'] == '
 				</form>
 				</div>
 			</div>
+			<div class="postbox" id="error-log">
+				<h3><?php _e('BotSmasher API Errors (Last 20)','botsmasher'); ?></h3>
+				<div class="inside">
+					<p>
+					<?php _e('This is a record of errors returned by the BotSmasher API or by WordPress when smashing a bot. If you\'re having trouble with BotSmasher, this is useful information for debugging.','botsmasher'); ?>
+					</p>
+					<div class="bs_error_log">
+						<?php
+							$exceptions = get_option( 'bs_exceptions' );
+							$return = '';
+							if ( is_array( $exceptions ) ) {
+								foreach ( $exceptions as $exception ) {
+									$date = date_i18n( 'M d, H:i', $exception['date'] );
+									$response = $exception['message'];
+									$report = ( isset( $exception['report'] ) )?$exception['report']:"N/A";
+									if ( strpos( $response, 'request limit' ) && date( 'Y-m-d', $exception['date'] ) == date( 'Y-m-d', current_time( 'timestamp' ) ) ) {
+										$target_link = "http://www.botsmasher.com/contact.php";
+										echo "<div class='updated'><p>".sprintf( __('You have reached your BotSmasher API check limit for today. <a href="%s">Raise your limit!</a>'), $target_link )."</p></div>";
+									}
+									$return .= "<tr><th scope='row'>$date</th><td>$response</td><td>$report</td></tr>";
+								}
+								echo "
+									<table class='widefat'>
+										<thead>
+											<tr>
+												<th scope='col'>".__('Date','botsmasher')."</th>
+												<th scope='col'>".__('Message','botsmasher')."</th>
+												<th scope='col'>".__('Reported by','botsmasher')."</th>
+											</tr>
+										</thead>
+										<tbody>
+										".$return."
+										</tbody>
+									</table>";
+							} else {
+								_e('No errors reported.', 'botsmasher' );
+							}
+						?>
+					</div>				
+				</div>			
+			</div>
 			<div class="postbox" id="get-support">
 			<h3><?php _e('Get Plug-in Support','botsmasher'); ?></h3>
 				<div class="inside">
 				<?php bs_get_support_form(); ?>
 				</div>
-			</div>			
+			</div>
 		</div>
 	</div>
 </div>
@@ -246,42 +285,24 @@ if ( !$options || !isset($options['bs_api_key'] ) || $options['bs_api_key'] == '
 						</div>
 					</form>
 					</div>
-					<div class="bs_api_usage">
-					<?php
-						$day_count = $bs_options['bs_daily_api_queries'];
-						$total_count = $bs_options['bs_total_api_queries'] + $day_count;
-						$thwart_count = $bs_options['bs_total_thwarts'];
-						printf( __( 'Total Checks: %1$d<br />Bots Smashed: %2$d<br />Today\'s Checks: %3$d', 'botsmasher' ), $total_count, $thwart_count, $day_count );
-					?>
-					</div>
-
 				</div>
 			</div>
 		</div>
 		<div class="ui-sortable meta-box-sortables">
 			<div class="postbox">
-				<h3><?php _e('BotSmasher API Errors (Last 20)','botsmasher'); ?></h3>
+				<h3><?php _e('Your API Usage','botsmasher'); ?></h3>
+				<?php
+					$day_count = "<strong>".$bs_options['bs_daily_api_queries']."</strong>";
+					$total_count = "<strong>".( $bs_options['bs_total_api_queries'] + $day_count )."</strong>";
+					$thwart_count = "<strong>".$bs_options['bs_total_thwarts']."</strong>";
+				?>
 				<div class="inside">
-					<div class="bs_error_log">
-						<?php
-							$exceptions = get_option( 'bs_exceptions' );
-							$return = '';
-							if ( is_array( $exceptions ) ) {
-								foreach ( $exceptions as $exception ) {
-									$date = date_i18n( 'M d, H:i', $exception['date'] );
-									$response = $exception['message'];
-									if ( strpos( $response, 'request limit' ) && date( 'Y-m-d', $exception['date'] ) == date( 'Y-m-d', current_time( 'timestamp' ) ) ) {
-										$target_link = "http://www.botsmasher.com/contact.php";
-										echo "<div class='updated'><p>".sprintf( __('You have reached your BotSmasher API check limit for today. <a href="%s">Raise your limit!</a>'), $target_link )."</p></div>";
-									}
-									$return .= "<li><strong>$date</strong><br />$response</li>";
-								}
-								echo "<ul>".$return."</ul>";
-							} else {
-								_e('No errors reported.', 'botsmasher' );
-							}
-						?>
-					</div>				
+				<p>
+				<?php printf( __( 'Total Checks: %1$s<br />Bots Smashed: %2$s<br />Today\'s Checks: %3$s', 'botsmasher' ), $total_count, $thwart_count, $day_count ); ?>
+				</p>
+				<p>					
+				<?php _e( 'The <a href="http://www.botsmasher.com">BotSmasher API</a> was created and is supported by <a href="http://www.karlgroves.com">Karl Groves</a>.','botsmasher'); ?>
+				</p>
 				</div>
 			</div>
 		</div>
@@ -343,7 +364,7 @@ URL: $home_url
 Install: $wp_url
 Language: $language
 Charset: $charset
-Admin Email: $current_user->user_email
+User Email: $current_user->user_email
 
 ==Extra info:==
 PHP Version: $php_version
@@ -420,7 +441,7 @@ $plugins_string
 
 function bs_handle_exception( $e, $response ) {
 	if ( defined ( 'BS_DEBUGGING' ) && BS_DEBUGGING == true ) {
-		wp_mail( BS_DEBUG_TO, 'BotSmasher: Handled Exception', print_r( $e, 1 )."\n\n".print_r( $response, 1 ) );
+		wp_mail( BS_DEBUG_TO, 'BotSmasher: Handled Exception', print_r( $response, 1 )."\n\n".print_r( $e, 1 ) );
 	}
 	$exceptions = get_option( 'bs_exceptions' );
 	if ( !is_array( $exceptions ) ) {
@@ -430,10 +451,12 @@ function bs_handle_exception( $e, $response ) {
 		array_shift( $exceptions );
 	}	
 	if ( $response == 'is_wp_error' ) {
-		$message = "BS: ".$e->get_error_message();
+		$message = $e->get_error_message();
+		$report = "WordPress";
 	} else {
-		$message = "WP: ".$e->getMessage();
+		$message = $e->getMessage();
+		$report = "BotSmasher";
 	}
-	$exceptions[] = array( 'date'=>current_time( 'timestamp' ), 'message'=> $message );
+	$exceptions[] = array( 'date'=>current_time( 'timestamp' ), 'message'=> $message, 'report'=>$report );
 	update_option( 'bs_exceptions', $exceptions );
 }

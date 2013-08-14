@@ -28,6 +28,7 @@ class botsmasherClient {
      * @return bool
      */
     protected function validateOpts() {
+	
         // 'key' is absolutely required by botsmasher
         if (FALSE == array_key_exists('key', $this -> opts)) {
             return FALSE;
@@ -38,9 +39,13 @@ class botsmasherClient {
             return FALSE;
         }
 
+        // action not set
+        if (FALSE == array_key_exists('action', $this -> opts)){
+            return FALSE;
+        }		
         // action is required and must be 'check', 'submit', or 'clear'
         $actionVals = array('check', 'submit', 'clear');
-        if ((FALSE == array_key_exists('action', $this -> opts)) || !in_array( $this -> opts['action'], $actionVals ) ) {
+        if ( !in_array( strtolower( $this -> opts['action'] ), $actionVals ) ) {
             return FALSE;
         }
 
@@ -89,6 +94,11 @@ class botsmasherClient {
 		if ( !is_wp_error($result) ) {
 			if ( $result['response']['code'] == 200 ) {
 				$body = $result['body'];
+				// some server errors return correct data, but with appended errors.
+				// If so, remove appended error so data is parseable.
+				$parts = explode( '}}}}', $body );
+				$body = $parts[0].'}}}}';
+
 			} 
 		} else {
 			bs_handle_exception( $result, 'is_wp_error' );
@@ -115,22 +125,22 @@ class botsmasherClient {
             if (is_null($array)) {
                 switch (json_last_error()) {
                     case JSON_ERROR_DEPTH :
-                        $msg = ' - Maximum stack depth exceeded';
+                        $msg = 'Maximum stack depth exceeded';
                         break;
                     case JSON_ERROR_STATE_MISMATCH :
-                        $msg = ' - Underflow or the modes mismatch';
+                        $msg = 'Underflow or the modes mismatch';
                         break;
                     case JSON_ERROR_CTRL_CHAR :
-                        $msg = ' - Unexpected control character found';
+                        $msg = 'Unexpected control character found';
                         break;
                     case JSON_ERROR_SYNTAX :
-                        $msg = ' - Syntax error, malformed JSON';
+                        $msg = 'Syntax error, malformed JSON';
                         break;
                     case JSON_ERROR_UTF8 :
-                        $msg = ' - Malformed UTF-8 characters, possibly incorrectly encoded';
+                        $msg = 'Malformed UTF-8 characters, possibly incorrectly encoded';
                         break;
                     default :
-                        $msg = ' - Unknown error';
+                        $msg = 'Unknown error';
                         break;
                 }
                 throw new Exception($msg);
@@ -153,7 +163,7 @@ class botsmasherClient {
 				if ( !$this -> apiKey ) {
 					throw new Exception('No valid API key');
 				} else {
-					throw new Exception('ERROR: NOT ABLE TO DECODE THE RESPONSE');
+					//throw new Exception('ERROR: NOT ABLE TO DECODE THE RESPONSE');
 				}
             } else {
                 if ($array['response']['summary']['code'] == 'failure') {

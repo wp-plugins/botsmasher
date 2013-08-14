@@ -4,7 +4,7 @@ Donate link: http://www.joedolson.com/donate.php
 Tags: botsmasher, spam, anti-spam, captcha, comments, registration, contact form
 Requires at least: 3.4.2
 Tested up to: 3.6.0
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPLv2 or later
 
 BotSmasher stops spam by checking comments and registrations against the BotSmasher API. 
@@ -15,15 +15,17 @@ BotSmasher stops spam by checking comments and registrations against the BotSmas
 
 BotSmasher is a CAPTCHA-less tool to check user submissions for spam. Why CAPTCHA-less? Because your spam isn't your visitors' problem.
 
-<strong>Comments</strong>
+[Register with BotSmasher](http://www.botsmasher.com/register.php) to get an API key and start smashing bots!
+
+= Comments =
 
 All comments supplied by users who aren't administrators are checked by BotSmasher. If they are identified as spam, they'll be flagged as spam and not shown on your site. You can report false positives back to BotSmasher if a real comment gets flagged.
 
-<strong>Registrations</strong>
+= Registrations =
 
 New registrations are run through BotSmasher. Anybody flagged by BotSmasher will get a notice that they've been flagged as spam, and directed to contact the site separately. When you get the new user email from WordPress, it'll include a link to the user's profile that enables you to flag that user in BotSmasher.
 
-<strong>Contact Form</strong>
+= Contact Form =
 
 BotSmasher includes an integrated and accessible contact form with basic customization options. The contact form shortcode is documented on the settings page, but can also be configured via the widget tool. 
 
@@ -46,6 +48,14 @@ Translating my plug-ins is always appreciated. Visit <a href="http://translate.j
 4. Add your API key on the Settings > BotSmasher screen.
 
 == Changelog ==
+
+= 1.0.3 =
+
+* Added link to BotSmasher registration page by API key field.
+* Added text to readme about registering with BotSmasher.
+* Improved debugging log, modified settings page layout.
+* Bug fix: check if registration message function already declared.
+* Bug fix: If API JSON data has error message appended, strip it so data is parseable.
 
 = 1.0.2 =
 
