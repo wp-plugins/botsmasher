@@ -1,0 +1,7 @@
+.bs-form label span { font-size: .9em; color: red; }
+.bs-form label span:before { content: '('; }
+.bs-form label span:after { content: ')'; }
+.bs-form label { display: inline-block; min-width: 10em; text-align: right; } 
+.widget .bs-form label { text-align: left; }
+.bs-notice { font-size: 1.1em; padding: 10px; border: 1px solid; border-radius: 5px;}
+.bs-error { color: #000; background: #ffd; margin-bottom: 4px; padding: 2px 4px; border: 1px solid #900;}
