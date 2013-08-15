@@ -180,7 +180,7 @@ function bs_admin_styles() {
 function bs_admin_menu() { ?>
 <?php echo bs_update_settings(); ?>
 <?php $bs_options = get_option( 'bs_options' );
-if ( !$options || !isset($options['bs_api_key'] ) || $options['bs_api_key'] == '' ) {
+if ( !$bs_options || !isset($bs_options['bs_api_key'] ) || $bs_options['bs_api_key'] == '' ) {
 	$message = sprintf(__("You must <a href='%s'>enter a BotSmasher API key</a> to use BotSmasher.", 'botsmasher'), admin_url('options-general.php?page=botsmasher/botsmasher.php'));
 	add_action('admin_notices', create_function( '', "if ( ! current_user_can( 'manage_options' ) ) { return; } else { echo \"<div class='error'><p>$message</p></div>\";}" ) );
 } ?>

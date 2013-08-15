@@ -16,7 +16,7 @@ function bs_checker( $args=array() ) {
 	global $bs_api_url;
 	// check the local registry (clears and blacklists) before querying BotSmasher
 	if ( $action = 'check' ) {
-		$result = bs_check_local_registry( array( 'ip'=>$ip,'email'=>$email,'name'=>$author ) );
+		$result = bs_check_local_registry( array( 'ip'=>$ip,'email'=>$email,'name'=>$name ) );
 	}
 	if ( !$result ) {
 		$bs = new botsmasherClient( $bs_api_url, $bs_options['bs_api_key'] );
@@ -31,15 +31,15 @@ function bs_checker( $args=array() ) {
 			update_option( 'bs_options', $bs_options );			
 		}		
 	}
-	do_action( 'bs_handle_results', $result, $ip, $email, $author, $action );
+	do_action( 'bs_handle_results', $result, $ip, $email, $name, $action );
 	return ( $result === 1 || $result === true ) ? true : false;
 }
 
 add_action( 'bs_handle_results', 'bs_local_registry', 10, 5 );
-function bs_local_registry( $result, $ip, $email, $author, $action ) {
+function bs_local_registry( $result, $ip, $email, $name, $action ) {
 	if ( $action != 'check' ) {
 		// insert into DB
-		$args = array( 'ip'=>$ip, 'email'=>$email, 'name'=>$author );
+		$args = array( 'ip'=>$ip, 'email'=>$email, 'name'=>$name );
 		$title = md5($args['ip'].$args['email'].$args['name']);
 		$post = array( 'post_title'=>$title, 'post_status'=>'publish', 'post_type'=>'bs_flags' );
 		$id = wp_insert_post( $post );
@@ -51,8 +51,9 @@ function bs_local_registry( $result, $ip, $email, $author, $action ) {
 }
 
 function bs_check_local_registry( $args ) {
-	$result = $args['result'];
-	unset( $args['result'] );
+	if ( isset( $args['result'] ) ) {
+		unset( $args['result'] );
+	}
 	$posts = get_posts( array( 'meta_key'=>'bs_flag_data', 'meta_value'=>json_encode($args) ) );
 	$count = count($posts);
 	if ( $count > 0 ) {

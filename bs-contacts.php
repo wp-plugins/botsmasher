@@ -18,8 +18,19 @@ function bs_form( $atts, $content ) {
 	return bs_contact_form( $recipient, $submit, $fields, $labels, $required, $subject, $thanks, $template );
 }
 
+function bs_generate_array( $fields ) {
+	foreach ( $fields as $field ) {
+		$array[$field] = ' ';
+	}
+	$array['name'] == '';
+	$array['email'] == '';
+	$array['message'] == '';
+	return $array; 
+}
+
 function bs_contact_form( $recipient, $submit, $fields, $labels, $required, $subject, $thanks, $template ) {
 	$return = $status = '';
+	$errors = array();
 	$options = get_option( 'bs_options' );
 	$lr = trim($options['bs_required_label']);	
 	$fields = array_map( 'trim', explode( ',', $fields ) );
@@ -29,9 +40,10 @@ function bs_contact_form( $recipient, $submit, $fields, $labels, $required, $sub
 		return __('Field count and label count does not match. You must have a label specified for all fields.','botsmasher');
 	}
 	$labels = array_combine( $fields, $labels );
-	$post = array_combine( $fields, array() ); 
+	$post = bs_generate_array( $fields ); 
 	$return = bs_submit_form( $_POST, $recipient, $fields, $labels, $required, $subject, $thanks, $template );
 	$message = $return['message'];
+	$message = ( $message ) ? "<p class='bs-notice'>$message</p>" : '';
 	$hash = md5( $recipient.$fields.$labels.$required.$subject.$thanks.$template );
 	if ( is_array( $return['post'] ) ) {
 		$post = $return['post'];
@@ -60,7 +72,7 @@ function bs_contact_form( $recipient, $submit, $fields, $labels, $required, $sub
 	<div class='bs-inner'>
 	<div class='form'>
 		<div class='header'>
-			<p class='bs-notice'>$message</p>
+			$message
 		</div>
 		<div class='body'>
 			<form action='' method='post'>
@@ -169,6 +181,8 @@ function bs_set_type( $field ) {
 function bs_submit_form( $pd, $recipient, $fields, $labels, $required, $subject, $thanks, $template ) {
 	// hash ensures that forms are unique (widget won't submit main, etc.)
 	$hash = md5( $recipient.$fields.$labels.$required.$subject.$thanks.$template );
+	$return = '';
+	$post = array( 'status'=>'', 'name'=>'', 'email'=>'', 'message'=>'' );
 	if ( isset($pd['bs_contact_form']) && $pd['bs_contact_form'] == $hash ) {
 		if ( !wp_verify_nonce($pd['bs_contact_form_nonce'],'bs_contact_form') ) { wp_die(); }
 		do_action( 'bs_pre_filter_contact', $pd, $recipient, $submit, $fields, $labels, $required, $thanks );

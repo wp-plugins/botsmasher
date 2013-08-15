@@ -49,6 +49,11 @@ Translating my plug-ins is always appreciated. Visit <a href="http://translate.j
 
 == Changelog ==
 
+= 1.0.4 =
+
+* Miscellaneous warnings and notices in contact form submission.
+* Big fixes in local spam registry pre-check.
+
 = 1.0.3 =
 
 * Added link to BotSmasher registration page by API key field.
