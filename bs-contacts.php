@@ -15,7 +15,7 @@ function bs_form( $atts, $content ) {
 			'subject'=>'Submission from Contact Form by {name}'
 		), $atts) );
 		$template = $content; 
-	return bs_contact_form( $recipient, $submit, $fields, $labels, $required, $subject, $thanks, $template );
+	return bs_contact_form( $recipient, $submit, $fields, $labels, $required, $subject, $thanks, $template, $recipientname );
 }
 
 function bs_generate_array( $fields ) {
@@ -28,7 +28,7 @@ function bs_generate_array( $fields ) {
 	return $array; 
 }
 
-function bs_contact_form( $recipient, $submit, $fields, $labels, $required, $subject, $thanks, $template ) {
+function bs_contact_form( $recipient, $submit, $fields, $labels, $required, $subject, $thanks, $template, $recipientname ) {
 	$return = $status = '';
 	$errors = array();
 	$options = get_option( 'bs_options' );
@@ -43,7 +43,7 @@ function bs_contact_form( $recipient, $submit, $fields, $labels, $required, $sub
 	$post = bs_generate_array( $fields ); 
 	$return = bs_submit_form( $_POST, $recipient, $fields, $labels, $required, $subject, $thanks, $template );
 	$message = $return['message'];
-	$message = ( $message ) ? "<p class='bs-notice'>$message</p>" : '';
+	$message = ( $message ) ? "<div class='bs-notice'>$message</div>" : '';
 	$hash = md5( $recipient.$fields.$labels.$required.$subject.$thanks.$template );
 	if ( is_array( $return['post'] ) ) {
 		$post = $return['post'];
@@ -178,91 +178,96 @@ function bs_set_type( $field ) {
 	return apply_filters( 'bs_set_type', $type, $field );
 }
 
-function bs_submit_form( $pd, $recipient, $fields, $labels, $required, $subject, $thanks, $template ) {
+function bs_submit_form( $pd, $recipient, $fields, $labels, $required, $subject, $thanks, $template, $recipientname ) {
 	// hash ensures that forms are unique (widget won't submit main, etc.)
-	$hash = md5( $recipient.$fields.$labels.$required.$subject.$thanks.$template );
-	$return = '';
-	$post = array( 'status'=>'', 'name'=>'', 'email'=>'', 'message'=>'' );
-	if ( isset($pd['bs_contact_form']) && $pd['bs_contact_form'] == $hash ) {
-		if ( !wp_verify_nonce($pd['bs_contact_form_nonce'],'bs_contact_form') ) { wp_die(); }
-		do_action( 'bs_pre_filter_contact', $pd, $recipient, $submit, $fields, $labels, $required, $thanks );
-		$post['email'] = sanitize_email( $pd['bs_email'] );
-		$post['name'] = stripslashes( sanitize_text_field( $pd['bs_name'] ) );
-		$ip = $_SERVER['REMOTE_ADDR'];
-		$result = bs_checker( array( 'ip'=>$ip, 'email'=>$post['email'], 'name'=>$post['name'], 'action'=>'check' ) );
-		do_action( 'bs_post_filter_contact', $pd, $recipient, $submit, $fields, $labels, $required, $thanks );
-		if ( $result ) { // this is spam!
-			return array( 'message'=>__( 'BotSmasher thinks you\'re a spammer. Please contact us if you\'re a real person!', 'botsmasher' ) );
-		} else {
-			foreach ( $fields as $value ) {
-				switch ($value) {
-					case 'name':
-						$default_template .= "{name}";
-						if ( empty( $_POST['bs_name'] ) ) {
-							$errors['name'] = array( 'label'=>$labels[$value], 'name'=>'name', 'post'=>'' );
-						}
-						break;
-					case 'email':
-						$default_template .= "\n{email}";
-						if ( empty( $_POST['bs_email'] ) ) {
-							$errors['email'] = array( 'label'=>$labels[$value], 'name'=>'email', 'post'=>'' );
-						}						
-						break;
-					case 'number':
-						$val = ( is_numeric( $_POST["bs_$value"] ) )?$_POST["bs_$value"]:false;
-						$val = apply_filters( "bs_sanitize_$value", $val, $labels[$value] );
-						if ( $val ) {
-							$post[$value] = $val;
-							$default_template .= "\n{".$value."}";
-						} else {
-							if ( in_array( $value, $required ) ) {
-								$is_error = true; 
-								$errors[$value] = array( 'label'=>$labels[$value], 'name'=>$value, 'post'=>$_POST["bs_$value"] );
-							}
-						}
-						break;					
-					default:
-						$val = apply_filters( "bs_sanitize_$value", sanitize_text_field( $_POST["bs_$value"] ), $labels[$value] );
-						if ( $val ) {
-							$post[$value] = $val;
-							$default_template .= "\n{".$value."}";
-						} else {
-							if ( in_array( $value, $required ) ) {
-								$is_error = true; 
-								$errors[$value] = array( 'label'=>$labels[$value], 'name'=>$value, 'post'=>$_POST["bs_$value"] );
-							}
-						}
-						break;
-				}
-			}
-			do_action( 'bs_post_sanitize_contact', $post, $recipient, $submit, $fields, $labels, $required, $thanks );
-			
-			if ( $is_error ) {
-				$post['status'] = ' errors';
-				$post['errors'] = $errors;
+	if ( isset( $pd['bs_contact_form'] ) ) {
+		$hash = md5( $recipient.$fields.$labels.$required.$subject.$thanks.$template );
+		$return = $default_template = '';
+		$is_error = false;
+		$post = array( 'status'=>'', 'name'=>'', 'email'=>'', 'message'=>'' );
+		if ( isset($pd['bs_contact_form']) && $pd['bs_contact_form'] == $hash ) {
+			if ( !wp_verify_nonce($pd['bs_contact_form_nonce'],'bs_contact_form') ) { wp_die(); }
+			do_action( 'bs_pre_filter_contact', $pd, $recipient, $fields, $labels, $required, $subject, $thanks );
+			$post['email'] = sanitize_email( $pd['bs_email'] );
+			$post['name'] = stripslashes( sanitize_text_field( $pd['bs_name'] ) );
+			$ip = $_SERVER['REMOTE_ADDR'];
+			$result = bs_checker( array( 'ip'=>$ip, 'email'=>$post['email'], 'name'=>$post['name'], 'action'=>'check' ) );
+			do_action( 'bs_post_filter_contact', $pd, $recipient, $fields, $labels, $required, $subject, $thanks );
+			if ( $result ) { // this is spam!
+				return array( 'message'=>__( 'BotSmasher thinks you\'re a spammer. Please contact us if you\'re a real person!', 'botsmasher' ) );
 			} else {
-				$post['status'] = ' submitted';
-				$post['errors'] = '';
+				foreach ( $fields as $value ) {
+					switch ($value) {
+						case 'name':
+							$default_template .= "{name}";
+							if ( empty( $_POST['bs_name'] ) ) {
+								$errors['name'] = array( 'label'=>$labels[$value], 'name'=>'name', 'post'=>'' );
+							}
+							break;
+						case 'email':
+							$default_template .= "\n{email}";
+							if ( empty( $_POST['bs_email'] ) ) {
+								$errors['email'] = array( 'label'=>$labels[$value], 'name'=>'email', 'post'=>'' );
+							}						
+							break;
+						case 'number':
+							$val = ( is_numeric( $_POST["bs_$value"] ) )?$_POST["bs_$value"]:false;
+							$val = apply_filters( "bs_sanitize_$value", $val, $labels[$value] );
+							if ( $val ) {
+								$post[$value] = $val;
+								$default_template .= "\n{".$value."}";
+							} else {
+								if ( in_array( $value, $required ) ) {
+									$is_error = true; 
+									$errors[$value] = array( 'label'=>$labels[$value], 'name'=>$value, 'post'=>$_POST["bs_$value"] );
+								}
+							}
+							break;					
+						default:
+							$val = apply_filters( "bs_sanitize_$value", sanitize_text_field( $_POST["bs_$value"] ), $labels[$value] );
+							if ( $val ) {
+								$post[$value] = $val;
+								$default_template .= "\n{".$value."}";
+							} else {
+								if ( in_array( $value, $required ) ) {
+									$is_error = true; 
+									$errors[$value] = array( 'label'=>$labels[$value], 'name'=>$value, 'post'=>$_POST["bs_$value"] );
+								}
+							}
+							break;
+					}
+				}
+				do_action( 'bs_post_sanitize_contact', $post, $recipient, $fields, $labels, $required, $subject, $thanks );
+				
+				if ( $is_error ) {
+					$post['status'] = ' errors';
+					$post['errors'] = $errors;
+				} else {
+					$post['status'] = ' submitted';
+					$post['errors'] = '';
+				}
+				
+				if ( !$template ) { $template = apply_filters( 'bs_custom_template', $default_template, $post, $recipient ); }
+				
+				$message = bs_draw_template( $post, $template );
+				$subject = bs_draw_template( $post, $subject );
+				$senderfrom = "From: \"$recipientname\" <$recipient>";
+				$recipientfrom = "From: \"$post[name]\" <$post[email]>";
+				if ( get_option( 'bs_html_email' ) == 'true' ) {
+					add_filter('wp_mail_content_type',create_function('', 'return "text/html";'));
+				}
+				wp_mail( $post['email'], $subject, $message, $senderfrom );
+				wp_mail( $recipient, $subject, $message, $recipientfrom );
+				if ( get_option( 'bs_html_email' ) == 'true' ) {
+					remove_filter('wp_mail_content_type',create_function('', 'return "text/html";'));
+				}			
+				$return = "<div class='bs-thanks'>".wpautop( stripslashes( $thanks ) )."</div>";
 			}
-			
-			if ( !$template ) { $template = apply_filters( 'bs_custom_template', $default_template, $post, $recipient ); }
-			
-			$message = bs_draw_template( $post, $template );
-			$subject = bs_draw_template( $post, $subject );
-			$senderfrom = "From: \"$recipientname\" <$recipient>";
-			$recipientfrom = "From: \"$post[name]\" <$post[email]>";
-			if ( get_option( 'bs_html_email' ) == 'true' ) {
-				add_filter('wp_mail_content_type',create_function('', 'return "text/html";'));
-			}
-			wp_mail( $post['email'], $subject, $message, $senderfrom );
-			wp_mail( $recipient, $subject, $message, $recipientfrom );
-			if ( get_option( 'bs_html_email' ) == 'true' ) {
-				remove_filter('wp_mail_content_type',create_function('', 'return "text/html";'));
-			}			
-			$return = "<div class='bs-thanks'>".wpautop( stripslashes( $thanks ) )."</div>";
 		}
+		return array( 'message'=>$return, 'post'=>$post );
+	} else {
+		return false;
 	}
-	return array( 'message'=>$return, 'post'=>$post );
 }
 
 function bs_generate_params( $instance ) {
@@ -281,8 +286,8 @@ function bs_generate_params( $instance ) {
 	$fields = $labels = $required = array(); 
 	$fields[] = 'name'; 
 	$fields[] = 'email';
-	$labels[] = $instance['name_label'];
-	$labels[] = $instance['email_label'];
+	$labels[] = ( isset( $instance['name_label'] ) )?$instance['name_label']:'';
+	$labels[] = ( isset( $instance['email_label'] ) )?$instance['email_label']:'';
 	
 	foreach ( $the_fields as $field => $value  ) {
 		$labels[] = $value['label'];
@@ -324,12 +329,12 @@ class bs_quick_contact extends WP_Widget {
 		$widget_title = ( $title!='' ) ? $before_title . $title . $after_title : '';
 		$after_widget = apply_filters( 'bs_widget_after', $after_widget );
 		$before_widget = apply_filters( 'bs_widget_before', $before_widget );
-
+		$recipientname = apply_filters( 'bs_recipient_name', get_option( 'blogname' ) );
 		extract( $params );
 		
 		echo $before_widget;
 		echo $widget_title;
-		echo bs_contact_form( $recipient, $submit, $fields, $labels, $required, $subject, $thanks, $template );
+		echo bs_contact_form( $recipient, $submit, $fields, $labels, $required, $subject, $thanks, $template, $recipientname );
 		echo $after_widget;
 	}
 
@@ -358,35 +363,44 @@ class bs_quick_contact extends WP_Widget {
 			$tags[] = "{".$field."}";
 		}
 		$tags = "<code>".implode( '</code>, <code>',$tags )."</code>";
+		$title = ( isset( $instance['title'] ) )?$instance['title']:'';
+		$recipient = ( isset( $instance['recipient'] ) )?$instance['recipient']:'';
+		$submit = ( isset( $instance['submit'] ) )?$instance['submit']:'';
+		$subject = ( isset( $instance['subject'] ) )?$instance['subject']:'';
+		$thanks = ( isset( $instance['thanks'] ) )?$instance['thanks']:'';
+		$template = ( isset( $instance['template'] ) )?$instance['template']:'';
+		$name_label = ( isset( $instance['name_label'] ) )?$instance['name_label']:'';
+		$email_label = ( isset( $instance['email_label'] ) )?$instance['email_label']:'';
+
 		echo $shortcode;
 ?>
 <div class='bs-widget'>
 <div class='prime'>
 <p>
 <label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Title', 'botsmasher' ); ?>:</label>
-<input type="text" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" value="<?php echo esc_attr( $instance['title'] ); ?>" class="widefat" />
+<input type="text" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" value="<?php echo esc_attr( $title ); ?>" class="widefat" />
 </p>
 <p>
 <label for="<?php echo $this->get_field_id( 'recipient' ); ?>"><?php _e( 'Recipient', 'botsmasher' ); ?>:</label>
-<input type="text" id="<?php echo $this->get_field_id( 'recipient' ); ?>" name="<?php echo $this->get_field_name( 'recipient' ); ?>" value="<?php echo esc_attr( $instance['recipient'] ); ?>" class="widefat" />
+<input type="text" id="<?php echo $this->get_field_id( 'recipient' ); ?>" name="<?php echo $this->get_field_name( 'recipient' ); ?>" value="<?php echo esc_attr( $recipient ); ?>" class="widefat" />
 </p>
 <p>
 <label for="<?php echo $this->get_field_id( 'submit' ); ?>"><?php _e( 'Submit Text', 'botsmasher' ); ?>:</label>
-<input type="text" id="<?php echo $this->get_field_id( 'submit' ); ?>" name="<?php echo $this->get_field_name( 'submit' ); ?>" value="<?php echo esc_attr( $instance['submit'] ); ?>" class="widefat" />
+<input type="text" id="<?php echo $this->get_field_id( 'submit' ); ?>" name="<?php echo $this->get_field_name( 'submit' ); ?>" value="<?php echo esc_attr( $submit ); ?>" class="widefat" />
 </p>
 <p>
 <label for="<?php echo $this->get_field_id( 'subject' ); ?>"><?php _e( 'Email Subject', 'botsmasher' ); ?>:</label>
-<input type="text" id="<?php echo $this->get_field_id( 'subject' ); ?>" name="<?php echo $this->get_field_name( 'subject' ); ?>" value="<?php echo esc_attr( $instance['subject'] ); ?>" class="widefat" aria-labelledby="<?php  echo $this->get_field_id( 'subject' ); echo $this->get_field_id( 'subject' ); ?>_label" />
+<input type="text" id="<?php echo $this->get_field_id( 'subject' ); ?>" name="<?php echo $this->get_field_name( 'subject' ); ?>" value="<?php echo esc_attr( $subject ); ?>" class="widefat" aria-labelledby="<?php  echo $this->get_field_id( 'subject' ); echo $this->get_field_id( 'subject' ); ?>_label" />
 <span id="<?php echo $this->get_field_id( 'subject' ); ?>_label"><?php _e('Available template tags: ', 'botsmasher' ); echo $tags; ?></span>
 </p>
 </div>
 <p>
 <label for="<?php echo $this->get_field_id( 'thanks' ); ?>"><?php _e( 'Thank you message', 'botsmasher' ); ?>:</label>
-<textarea cols="40" rows="2" id="<?php echo $this->get_field_id( 'thanks' ); ?>" name="<?php echo $this->get_field_name( 'thanks' ); ?>" class="widefat"><?php echo esc_attr( $instance['thanks'] ); ?></textarea>
+<textarea cols="40" rows="2" id="<?php echo $this->get_field_id( 'thanks' ); ?>" name="<?php echo $this->get_field_name( 'thanks' ); ?>" class="widefat"><?php echo esc_attr( $thanks ); ?></textarea>
 </p>
 <p>
 <label for="<?php echo $this->get_field_id( 'template' ); ?>"><?php _e( 'Message Template', 'botsmasher' ); ?>:</label>
-<textarea cols="40" rows="4" id="<?php echo $this->get_field_id( 'template' ); ?>" name="<?php echo $this->get_field_name( 'template' ); ?>" class="widefat" aria-labelledby="<?php  echo $this->get_field_id( 'template' ); echo $this->get_field_id( 'subject' ); ?>_label" ><?php echo esc_attr( $instance['template'] ); ?></textarea>
+<textarea cols="40" rows="4" id="<?php echo $this->get_field_id( 'template' ); ?>" name="<?php echo $this->get_field_name( 'template' ); ?>" class="widefat" aria-labelledby="<?php  echo $this->get_field_id( 'template' ); echo $this->get_field_id( 'subject' ); ?>_label" ><?php echo esc_attr( $template ); ?></textarea>
 <span id="<?php echo $this->get_field_id( 'template' ); ?>_label"><?php _e('Available template tags: ', 'botsmasher' ); echo $tags; ?></span>
 </p>
 <fieldset>
@@ -394,11 +408,11 @@ class bs_quick_contact extends WP_Widget {
 <div class="prime">
 <p>
 <label for="<?php echo $this->get_field_id( 'name_label' ); ?>"><?php _e( 'Name field label', 'botsmasher' ); ?>:</label>
-<input type="text" id="<?php echo $this->get_field_id( 'name_label' ); ?>" name="<?php echo $this->get_field_name( 'name_label' ); ?>" value="<?php echo esc_attr( $instance['name_label'] ); ?>" class="widefat" />
+<input type="text" id="<?php echo $this->get_field_id( 'name_label' ); ?>" name="<?php echo $this->get_field_name( 'name_label' ); ?>" value="<?php echo esc_attr( $name_label ); ?>" class="widefat" />
 </p>
 <p>
 <label for="<?php echo $this->get_field_id( 'email_label' ); ?>"><?php _e( 'Email field label', 'botsmasher' ); ?>:</label>
-<input type="text" id="<?php echo $this->get_field_id( 'email_label' ); ?>" name="<?php echo $this->get_field_name( 'email_label' ); ?>" value="<?php echo esc_attr( $instance['email_label'] ); ?>" class="widefat" />
+<input type="text" id="<?php echo $this->get_field_id( 'email_label' ); ?>" name="<?php echo $this->get_field_name( 'email_label' ); ?>" value="<?php echo esc_attr( $email_label ); ?>" class="widefat" />
 </p>
 </div>
 <table class="widefat botsmasher">

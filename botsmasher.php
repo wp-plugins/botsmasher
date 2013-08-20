@@ -3,7 +3,7 @@
 Plugin Name: BotSmasher
 Plugin URI: http://www.joedolson.com/articles/botsmasher/
 Description: BotSmasher smashes bots. 
-Version: 1.0.3
+Version: 1.0.4
 Author: Joe Dolson
 Author URI: http://www.joedolson.com/
 
@@ -34,7 +34,7 @@ define( 'BS_DEBUG_TO', get_option( 'admin_email' ) );
 define( 'BS_DEBUGGING', false );
 
 $bs_api_url = 'https://www.botsmasher.com/api/index.php';
-$bs_version = '1.0.3'; 
+$bs_version = '1.0.4'; 
 
 if ( !class_exists('botsmasherClient') ) {
 	require_once( plugin_dir_path(__FILE__).'botsmasherClient.class.php' );
@@ -157,7 +157,7 @@ function bs_update_settings() {
 			$bs_html_email = ( isset( $_POST['bs_html_email'] ) )?'on':'';
 			$bs_filter_comments = ( isset( $_POST['bs_filter_comments'] ) )?'on':'';
 			$bs_filter_registrations = ( isset( $_POST['bs_filter_registrations'] ) )?'on':'';
-			$options = array_merge( $opts, array( 'bs_api_key'=> $bs_api_key, 'bs_required_label'=>$bs_required_label, 'bs_html_email', $bs_html_email, 'bs_filter_comments'=>$bs_filter_comments, 'bs_filter_registrations'=>$bs_filter_registrations ) );
+			$options = array_merge( $opts, array( 'bs_api_key'=> $bs_api_key, 'bs_required_label'=>$bs_required_label, 'bs_html_email'=>$bs_html_email, 'bs_filter_comments'=>$bs_filter_comments, 'bs_filter_registrations'=>$bs_filter_registrations ) );
 			update_option( 'bs_options', $options );
 			
 			$message = __("BotSmasher Settings Updated",'botsmasher');
@@ -292,8 +292,9 @@ if ( !$bs_options || !isset($bs_options['bs_api_key'] ) || $bs_options['bs_api_k
 			<div class="postbox">
 				<h3><?php _e('Your API Usage','botsmasher'); ?></h3>
 				<?php
-					$day_count = "<strong>".$bs_options['bs_daily_api_queries']."</strong>";
+					$day_count = $bs_options['bs_daily_api_queries'];
 					$total_count = "<strong>".( $bs_options['bs_total_api_queries'] + $day_count )."</strong>";
+					$day_count = ( $day_count != '' )?"<strong>$day_count</strong>":"<strong>0</strong>";
 					$thwart_count = "<strong>".$bs_options['bs_total_thwarts']."</strong>";
 				?>
 				<div class="inside">
