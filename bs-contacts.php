@@ -41,7 +41,7 @@ function bs_contact_form( $recipient, $submit, $fields, $labels, $required, $sub
 	}
 	$labels = array_combine( $fields, $labels );
 	$post = bs_generate_array( $fields ); 
-	$return = bs_submit_form( $_POST, $recipient, $fields, $labels, $required, $subject, $thanks, $template );
+	$return = bs_submit_form( $_POST, $recipient, $fields, $labels, $required, $subject, $thanks, $template, $recipientname );
 	$message = $return['message'];
 	$message = ( $message ) ? "<div class='bs-notice'>$message</div>" : '';
 	$hash = md5( $recipient.$fields.$labels.$required.$subject.$thanks.$template );

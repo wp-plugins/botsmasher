@@ -49,6 +49,10 @@ Translating my plug-ins is always appreciated. Visit <a href="http://translate.j
 
 == Changelog ==
 
+= 1.0.5 =
+
+* Bug fix: Missing argument in bs_submit_form();
+
 = 1.0.4 =
 
 * Miscellaneous warnings and notices in contact form submission.
