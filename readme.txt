@@ -4,7 +4,7 @@ Donate link: http://www.joedolson.com/donate.php
 Tags: botsmasher, spam, anti-spam, captcha, comments, registration, contact form
 Requires at least: 3.4.2
 Tested up to: 3.6.1
-Stable tag: 1.0.4
+Stable tag: 1.0.5
 License: GPLv2 or later
 
 BotSmasher stops spam by checking comments and registrations against the BotSmasher API. 
