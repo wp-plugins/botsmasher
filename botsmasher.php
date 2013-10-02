@@ -159,7 +159,6 @@ function bs_update_settings() {
 			$bs_filter_registrations = ( isset( $_POST['bs_filter_registrations'] ) )?'on':'';
 			$options = array_merge( $opts, array( 'bs_api_key'=> $bs_api_key, 'bs_required_label'=>$bs_required_label, 'bs_html_email'=>$bs_html_email, 'bs_filter_comments'=>$bs_filter_comments, 'bs_filter_registrations'=>$bs_filter_registrations ) );
 			update_option( 'bs_options', $options );
-			
 			$message = __("BotSmasher Settings Updated",'botsmasher');
 			return "<div class='updated'><p>".$message."</p></div>";
 		}
@@ -252,6 +251,39 @@ if ( !$bs_options || !isset($bs_options['bs_api_key'] ) || $bs_options['bs_api_k
 					</div>				
 				</div>			
 			</div>
+			
+			<div class="postbox" id="bs-shortcode">
+			<h3><?php _e('BotSmasher Shortcode','botsmasher'); ?></h3>
+				<div class="inside">
+				<h4><?php _e('Simple Usage', 'botsmasher' ); ?></h4>
+				<p><code>[botsmasher]</code></p>
+				<p><?php _e( 'The basic BotSmasher shortcode produces a simple contact form with name, email, telephone, subject, and message. The name, email, and message fields are required. Messages will be sent to the administrator email set in WordPress general settings.', 'botsmasher' ); ?></p>
+				<h4><?php _e('Shortcode Attributes (defaults shown)', 'botsmasher' ); ?></h4>
+				<p><textarea disabled cols="50" rows="4" style="padding: 10px;border: none; background: transparent; width: 100%; font-family: monospace;">[botsmasher recipient="$admin_email" recipientname="$blogname" submit="Send Now" fields="name,email,phone,subject,message" labels="Name, Email, Telephone, Subject, Message" required="message" thanks="Thank you for contacting $blogname. We'll get back to you as soon as possible!" subject="Submission from Contact Form by {name}"]</textarea></p>
+				<p><?php _e( 'None of these attributes are required, but if you use them, there are particular things you will need to know:', 'botsmasher' ); ?></p>
+				<p><code>recipient</code>: <?php _e('Email or comma-separated string of emails to send messages to.', 'botsmasher' ); ?></p>
+				<p><code>recipientname</code>: <?php _e('Name of recipient. (Shown as email "from" name.)', 'botsmasher' ); ?></p>
+				<p><code>submit</code>: <?php _e('Text of submit button.', 'botsmasher' ); ?></p>
+				<p><code>fields</code>: <?php _e('Fields to include. Whatever you want, but "name" and "email" are always included, whether in this list or not. Include them in the list if you wish to customize their labels. Some keywords will trigger particular input types: e.g., "number", "phone" or "tel", "date", etc. "Message", "Notes", "Textarea" or "Description" will trigger textarea elements.', 'botsmasher' ); ?><strong><?php _e( "Fields listed must be unique.", 'botsmasher' ); ?></strong></p>
+				<p><code>labels</code>: <?php _e('Text labels for the above fields. Must be one label for every field listed.', 'botsmasher' ); ?></p>
+				<p><code>required</code>: <?php _e('Comma-separated list of required fields. Name and email need not be included, they are always required.', 'botsmasher' ); ?></p>
+				<p><code>thanks</code>: <?php _e('Thank you message displayed after form submission.', 'botsmasher' ); ?></p>
+				<p><code>subject</code>: <?php _e('Subject line of sent message. Note that the default value includes a template tag "{name}" - this will be replaced by the value submitted in the "name" field. Any included field is available as a template tag using the name of the field wrapped in curly braces.', 'botsmasher' ); ?></p>
+				<h4><?php _e( 'Customizing the Email message sent', 'botsmasher' ); ?></h4>
+				<p><?php _e( 'The <code>[botsmasher]</code> shortcode is a containing shortcode. Whatever you wrap inside the shortcode container will be used as the template for your email message sent. Alternately, you can use the <code>bs_customize_template</code> filter to generate a custom template.', 'botsmasher' ); ?></p>
+<textarea disabled cols="50" rows="9" style="padding: 10px;border: none; background: transparent; font-family: monospace; ">
+[botsmasher]
+Contact from my website: 
+
+Subject: {subject}
+From : {name} ({email}) 
+
+{message}
+[/botsmasher]
+</textarea>
+				</div>
+			</div>			
+			
 			<div class="postbox" id="get-support">
 			<h3><?php _e('Get Plug-in Support','botsmasher'); ?></h3>
 				<div class="inside">

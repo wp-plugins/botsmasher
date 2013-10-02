@@ -8,13 +8,13 @@ function bs_form( $atts, $content ) {
 			'recipientname' => get_option( 'blogname' ),
 			'submit'=> 'Send Now',
 			// Name and Email are always present and required. Only reason to add them is to customize their labels.
-			'fields'=> 'name,email,phone,street,street2,city,state,zip,country,date,number,message,custom1',
-			'labels'=> 'Name, Email, Telephone, Street, Street(2), City, State, Postal Code, Country, Date, Number, Message,Crazy Field',
+			'fields'=> 'name,email,phone,subject,message',
+			'labels'=> 'Name,Email,Telephone,Subject,Message',
 			'required'=> 'message',
 			'thanks'=> 'Thank you for contacting '.get_option('blogname').'. We\'ll get back to you as soon as possible!',
 			'subject'=>'Submission from Contact Form by {name}'
-		), $atts) );
-		$template = $content; 
+		), $atts, 'botsmasher' ) );
+		$template = apply_filters( 'bs_customize_template', $content, $atts ); 
 	return bs_contact_form( $recipient, $submit, $fields, $labels, $required, $subject, $thanks, $template, $recipientname );
 }
 
@@ -37,7 +37,7 @@ function bs_contact_form( $recipient, $submit, $fields, $labels, $required, $sub
 	$labels = array_map( 'trim', explode( ',', $labels ) );
 	$required = array_map( 'trim', explode( ',', $required ) );
 	if ( count( $fields ) != count( $labels ) ) {
-		return __('Field count and label count does not match. You must have a label specified for all fields.','botsmasher');
+		return __('Field count and label count does not match. You must have a label specified for all defined fields.','botsmasher');
 	}
 	$labels = array_combine( $fields, $labels );
 	$post = bs_generate_array( $fields ); 
@@ -48,13 +48,9 @@ function bs_contact_form( $recipient, $submit, $fields, $labels, $required, $sub
 	if ( is_array( $return['post'] ) ) {
 		$post = $return['post'];
 		$status = $post['status'];
-		if ( trim($status) == 'errors' ) {
-			$errors = $post['errors'];
-		} else {
-			$errors = array();
-		}
+		$errors = ( trim($status) == 'errors' ) ? $post['errors'] : array() ;
 	}
-	
+	// special case fields
 	if ( in_array( 'name', array_keys( $errors ) ) ) {
 		$error_name = apply_filters( 'bs_filter_name_error', "<div class='bs-error' id='bs_name_error'>".sprintf( __('%s is a required field.', 'botsmasher' ), $labels['name'] )."</div>" );
 		$aria_name = " aria-labelledby='bs_name_error'";
@@ -79,10 +75,10 @@ function bs_contact_form( $recipient, $submit, $fields, $labels, $required, $sub
 				<div><input type='hidden' name='bs_contact_form' value='$hash' />".
 				wp_nonce_field('bs_contact_form','bs_contact_form_nonce',false,false)."</div>
 				<p>$error_name
-					<label for='bs_name'>$labels[name] $lr</label> <input$aria_name aria-required='true' required type='text' name='bs_name' id='bs_name' value='$post[name]' placeholder='Your name' />
+					<label for='bs_name'>$labels[name] $lr</label> <input$aria_name aria-required='true' required type='text' name='bs_name' id='bs_name' value='".trim($post['name'])."' placeholder='Your name' />
 				</p>
 				<p>$error_email
-					<label for='bs_email'>$labels[email] $lr</label> <input$aria_email aria-required='true' required type='text' name='bs_email' id='bs_email' value='$post[email]' placeholder=\"Email Address\" />
+					<label for='bs_email'>$labels[email] $lr</label> <input$aria_email aria-required='true' required type='text' name='bs_email' id='bs_email' value='".trim($post['email'])."' placeholder=\"Email Address\" />
 				</p>";
 				foreach ( $fields as $value ) {
 					switch ($value) {
@@ -137,6 +133,7 @@ function bs_contact_form( $recipient, $submit, $fields, $labels, $required, $sub
 function bs_create_field( $field, $label, $value, $required, $errors=array() ) {
 	$type = bs_set_type( $field );
 	$options = get_option( 'bs_options' );
+	$value = trim( $value );
 	$is_required = in_array( $field, $required );
 	if ( in_array( $field, array_keys( $errors ) ) ) {
 		$error = apply_filters( 'bs_filter_error', "<div class='bs-error' id='bs_$field".'_error'."'>".sprintf( __('%s is a required field.', 'botsmasher' ), $label )."</div>", $field, $value );
@@ -163,16 +160,26 @@ function bs_create_field( $field, $label, $value, $required, $errors=array() ) {
 function bs_set_type( $field ) {
 // phone,street,street2,city,state,zip,country,date,number,message
 	switch ($field) {
-		case "phone":
 		case "street":
 		case "street2":
 		case "city":
 		case "state":
 		case "zip":
 		case "country":$type = 'text';break;
+		case "phone": 
+		case "tel" : 
+		case "telephone" : $type = 'tel';break;		
 		case "date":$type = 'date';break;
 		case "number":$type = 'number';break;
-		case "message":$type = 'textarea';break;
+		case "message":
+		case "notes" : 
+		case "textarea" : 
+		case "description" : $type = 'textarea';break;
+		case "datetime":$type = 'datetime';break;
+		case "email":$type = 'email'; break;
+		case "password": $type = 'password'; break;
+		case "month" : $type = 'month'; break;
+		case "url" : $type = 'url'; break;
 		default:$type = 'text';
 	}
 	return apply_filters( 'bs_set_type', $type, $field );
@@ -181,6 +188,7 @@ function bs_set_type( $field ) {
 function bs_submit_form( $pd, $recipient, $fields, $labels, $required, $subject, $thanks, $template, $recipientname ) {
 	// hash ensures that forms are unique (widget won't submit main, etc.)
 	if ( isset( $pd['bs_contact_form'] ) ) {
+		$options = get_option( 'bs_options' );
 		$hash = md5( $recipient.$fields.$labels.$required.$subject.$thanks.$template );
 		$return = $default_template = '';
 		$is_error = false;
@@ -190,28 +198,30 @@ function bs_submit_form( $pd, $recipient, $fields, $labels, $required, $subject,
 			do_action( 'bs_pre_filter_contact', $pd, $recipient, $fields, $labels, $required, $subject, $thanks );
 			$post['email'] = sanitize_email( $pd['bs_email'] );
 			$post['name'] = stripslashes( sanitize_text_field( $pd['bs_name'] ) );
-			$ip = $_SERVER['REMOTE_ADDR'];
-			$result = bs_checker( array( 'ip'=>$ip, 'email'=>$post['email'], 'name'=>$post['name'], 'action'=>'check' ) );
-			do_action( 'bs_post_filter_contact', $pd, $recipient, $fields, $labels, $required, $subject, $thanks );
+			if ( !$post['email'] || !$post['name'] ) {
+				if ( empty( $post['name'] ) ) {
+					$is_error = true;
+					$errors['name'] = array( 'label'=>$labels['name'], 'name'=>'name', 'post'=>'' );
+				}
+				$default_template .= "\n{email}";
+				if ( empty( $post['email'] ) ) {
+					$is_error = true;
+					$errors['email'] = array( 'label'=>$labels['email'], 'name'=>'email', 'post'=>'' );
+				}
+			} else {
+				$ip = $_SERVER['REMOTE_ADDR'];
+				$result = bs_checker( array( 'ip'=>$ip, 'email'=>$post['email'], 'name'=>$post['name'], 'action'=>'check' ) );
+				do_action( 'bs_post_filter_contact', $pd, $recipient, $fields, $labels, $required, $subject, $thanks );
+			}
+			$default_template .= "{name}";
+			
 			if ( $result ) { // this is spam!
-				return array( 'message'=>__( 'BotSmasher thinks you\'re a spammer. Please contact us if you\'re a real person!', 'botsmasher' ) );
+				return array( 'message'=>__( 'BotSmasher thinks you\'re a spammer. Please contact us if you\'re a real person!', 'botsmasher' ), 'post'=>$post );
 			} else {
 				foreach ( $fields as $value ) {
 					switch ($value) {
-						case 'name':
-							$default_template .= "{name}";
-							if ( empty( $_POST['bs_name'] ) ) {
-								$errors['name'] = array( 'label'=>$labels[$value], 'name'=>'name', 'post'=>'' );
-							}
-							break;
-						case 'email':
-							$default_template .= "\n{email}";
-							if ( empty( $_POST['bs_email'] ) ) {
-								$errors['email'] = array( 'label'=>$labels[$value], 'name'=>'email', 'post'=>'' );
-							}						
-							break;
 						case 'number':
-							$val = ( is_numeric( $_POST["bs_$value"] ) )?$_POST["bs_$value"]:false;
+							$val = ( is_numeric( $pd["bs_$value"] ) )?$pd["bs_$value"]:false;
 							$val = apply_filters( "bs_sanitize_$value", $val, $labels[$value] );
 							if ( $val ) {
 								$post[$value] = $val;
@@ -219,19 +229,19 @@ function bs_submit_form( $pd, $recipient, $fields, $labels, $required, $subject,
 							} else {
 								if ( in_array( $value, $required ) ) {
 									$is_error = true; 
-									$errors[$value] = array( 'label'=>$labels[$value], 'name'=>$value, 'post'=>$_POST["bs_$value"] );
+									$errors[$value] = array( 'label'=>$labels[$value], 'name'=>$value, 'post'=>$pd["bs_$value"] );
 								}
 							}
 							break;					
 						default:
-							$val = apply_filters( "bs_sanitize_$value", sanitize_text_field( $_POST["bs_$value"] ), $labels[$value] );
+							$val = apply_filters( "bs_sanitize_$value", sanitize_text_field( $pd["bs_$value"] ), $labels[$value] );
 							if ( $val ) {
 								$post[$value] = $val;
 								$default_template .= "\n{".$value."}";
 							} else {
 								if ( in_array( $value, $required ) ) {
 									$is_error = true; 
-									$errors[$value] = array( 'label'=>$labels[$value], 'name'=>$value, 'post'=>$_POST["bs_$value"] );
+									$errors[$value] = array( 'label'=>$labels[$value], 'name'=>$value, 'post'=>$pd["bs_$value"] );
 								}
 							}
 							break;
@@ -242,6 +252,17 @@ function bs_submit_form( $pd, $recipient, $fields, $labels, $required, $subject,
 				if ( $is_error ) {
 					$post['status'] = ' errors';
 					$post['errors'] = $errors;
+					$error_message = '';
+					foreach ( $errors as $error ) {
+						$error_message .= "<li>".sprintf( __( 'The provided information for <strong>%1$s</strong> did not validate.', 'botsmasher' ), $error['label'] ). "</li>";
+					}
+					$return = "
+					<div class='bs-errors'>
+						<ul>
+						".stripslashes( $error_message )."
+						</ul>
+					</div>";
+					return array( 'message'=>$return, 'post'=>$post );
 				} else {
 					$post['status'] = ' submitted';
 					$post['errors'] = '';
@@ -253,15 +274,16 @@ function bs_submit_form( $pd, $recipient, $fields, $labels, $required, $subject,
 				$subject = bs_draw_template( $post, $subject );
 				$senderfrom = "From: \"$recipientname\" <$recipient>";
 				$recipientfrom = "From: \"$post[name]\" <$post[email]>";
-				if ( get_option( 'bs_html_email' ) == 'true' ) {
+				
+				if ( $options['bs_html_email'] == 'on' ) {
 					add_filter('wp_mail_content_type',create_function('', 'return "text/html";'));
 				}
 				wp_mail( $post['email'], $subject, $message, $senderfrom );
 				wp_mail( $recipient, $subject, $message, $recipientfrom );
-				if ( get_option( 'bs_html_email' ) == 'true' ) {
+				if ( $options['bs_html_email'] == 'on' ) {
 					remove_filter('wp_mail_content_type',create_function('', 'return "text/html";'));
 				}			
-				$return = "<div class='bs-thanks'>".wpautop( stripslashes( $thanks ) )."</div>";
+				$return = "<div class='bs-thanks'>".stripslashes( $thanks )."</div>";
 			}
 		}
 		return array( 'message'=>$return, 'post'=>$post );
@@ -436,7 +458,7 @@ class bs_quick_contact extends WP_Widget {
 			$return .= "
 			<tr>
 				<th scope='row'><label for='".$this->get_field_id( 'fields' )."$i'>Label</label> 
-					<input type='text' value='".esc_attr($field['label'])."' name='".$this->get_field_name( 'fields' )."[$i][label]' id='".$this->get_field_id( 'fields' )."$i' /></th>
+					<input type='text' value='".esc_attr(trim($field['label']))."' name='".$this->get_field_name( 'fields' )."[$i][label]' id='".$this->get_field_id( 'fields' )."$i' /></th>
 				<td><label for='".$this->get_field_id( 'fields' )."$i'>Required</label> 
 					<input type='checkbox' value='1' $checked name='".$this->get_field_name( 'fields' )."[$i][required]' id='".$this->get_field_id( 'fields' )."$i' /></td>
 				<td><label for='".$this->get_field_id( 'fields' )."$i'>Type</label> 

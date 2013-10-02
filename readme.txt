@@ -3,7 +3,7 @@ Contributors: joedolson
 Donate link: http://www.joedolson.com/donate.php
 Tags: botsmasher, spam, anti-spam, captcha, comments, registration, contact form
 Requires at least: 3.4.2
-Tested up to: 3.6.0
+Tested up to: 3.6.1
 Stable tag: 1.0.4
 License: GPLv2 or later
 
@@ -27,7 +27,7 @@ New registrations are run through BotSmasher. Anybody flagged by BotSmasher will
 
 = Contact Form =
 
-BotSmasher includes an integrated and accessible contact form with basic customization options. The contact form shortcode is documented on the settings page, but can also be configured via the widget tool. 
+BotSmasher includes an integrated and accessible contact form with basic customization options. The contact form shortcode is documented on the settings page, but can also be configured via the widget tool. Customize styles by placing a stylesheet called 'bs-form.css' in your theme or child theme directory.
 
 = Translations =
 
@@ -52,6 +52,13 @@ Translating my plug-ins is always appreciated. Visit <a href="http://translate.j
 = 1.0.5 =
 
 * Bug fix: Missing argument in bs_submit_form();
+* Bug fix: Form could be submitted with blank name/email fields.
+* Bug fix: Return POST data on spam and blank name/email errors.
+* Bug fix: Form was still sent if required fields blank.
+* Bug fix: Form errors for 'name' and 'email' fields was not displayed.
+* Bug fix: Enabling HTML email did not work.
+* Minor style changes on front end forms.
+* Added documentation for contact form shortcode.
 
 = 1.0.4 =
 
