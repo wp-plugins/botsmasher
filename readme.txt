@@ -44,7 +44,7 @@ Translating my plug-ins is always appreciated. Visit <a href="http://translate.j
 
 1. Download the plugin's zip file, extract the contents, and upload them to your wp-content/plugins folder.
 2. Login to your WordPress dashboard, click "Plugins", and activate BotSmasher.
-3. At http://www.botsmasher.com, register to get an API key.
+3. Go to http://www.botsmasher.com and register to get an API key.
 4. Add your API key on the Settings > BotSmasher screen.
 
 == Changelog ==
@@ -53,8 +53,11 @@ Translating my plug-ins is always appreciated. Visit <a href="http://translate.j
 
 * New filter: bs_custom_field - generate a custom input field.
 * New filter: bs_draw_message - generate a custom response message.
-* Miscellaneous bug fixes.
-* 
+* New filter: bs_post_submit_message - modify notification message output.
+* Moved bs_stylesheet to wp_enqueue_scripts instead of wp_head
+* Added aria-required=true to support form request field.
+* Added debugging filters.
+* Bug fix: broken <select> element when saving widget.
 
 = 1.0.5 =
 

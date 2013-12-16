@@ -472,7 +472,7 @@ class bs_quick_contact extends WP_Widget {
 		$return = '';
 		foreach ( $fields as $field ) {
 			if ( $field['label'] == '' ) continue; 
-			$checked = ( $field['required'] == 1 )?"checked='checked'":'';
+			$checked = ( isset( $field['required'] ) && $field['required'] == 1 )?"checked='checked'":'';
 			$options = bs_options( $field['type'] );
 			$return .= "
 			<tr>
@@ -481,7 +481,7 @@ class bs_quick_contact extends WP_Widget {
 				<td><label for='".$this->get_field_id( 'fields' )."$i'>Required</label> 
 					<input type='checkbox' value='1' $checked name='".$this->get_field_name( 'fields' )."[$i][required]' id='".$this->get_field_id( 'fields' )."$i' /></td>
 				<td><label for='".$this->get_field_id( 'fields' )."$i'>Type</label> 
-					<select name='".$this->get_field_name( 'fields' )."[$i][type]' id='".$this->get_field_id( 'fields' )."$i' />$options</select></td>
+					<select name='".$this->get_field_name( 'fields' )."[$i][type]' id='".$this->get_field_id( 'fields' )."$i'>$options</select></td>
 				<td><a href='#' class='up'><span>".__('Up','botsmasher')."</span></a> / <a href='#' class='down'><span>".__('Down','botsmasher')."</span></a></td>
 			</tr>\n";
 			$i++;
@@ -494,7 +494,7 @@ class bs_quick_contact extends WP_Widget {
 		<td><label for='<?php echo $this->get_field_id( 'fields' ).$i; ?>'><?php _e('Required','botsmasher'); ?></label> 
 			<input type='checkbox' value='1' name='<?php echo $this->get_field_name( 'fields' )."[$i][required]"; ?>' id='<?php echo $this->get_field_id( 'fields' ).$i; ?>' /></td>
 		<td><label for='<?php echo $this->get_field_id( 'fields' ).$i; ?>'><?php _e('Type','botsmasher'); ?></label> 
-			<select name='<?php echo $this->get_field_name( 'fields' )."[$i][type]"; ?>' id='<?php echo $this->get_field_id( 'fields' ).$i; ?>' /><?php echo $default_options; ?></select></td>
+			<select name='<?php echo $this->get_field_name( 'fields' )."[$i][type]"; ?>' id='<?php echo $this->get_field_id( 'fields' ).$i; ?>'><?php echo $default_options; ?></select></td>
 		<td></td> 
 	</tr>
 </tbody>
