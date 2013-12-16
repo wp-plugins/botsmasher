@@ -1,0 +1,14 @@
+.bs-form label span { font-size: .9em; color: red; }
+.bs-form label span:before { content: '('; }
+.bs-form label span:after { content: ')'; }
+.bs-form label { display: block; float: left; min-width: 25%; text-align: right; margin-right: .4em;}
+.bs-form input[type=text], .bs-form input[type=email] { padding: 4px; width: 50% }
+.bs-form textarea { height: 120px; width: 70%; }
+.widget .bs-form label { text-align: left; }
+.bs-notice div { font-size: 1.1em; padding: .5em; border: .1em solid; border-radius: .5em; margin: 1em 0;  }
+div.bs-thanks { background: #ffd; border-color: #128; }
+div.bs-errors {  background: #fdd; color: #400; border-color: #a00;}
+.bs-form .bs-error { padding: .2em; margin-bottom: 4px; background: #ffb; border-top: 1px solid; border-bottom: 1px solid; color: #000; margin: 0 -1em .3em; }
+.bs-form .bs-error:before { content: "* "; }
+.bs-form form { border: 1px solid #ccc; padding: 1em; box-shadow: 0 0 2px #ccc; }
+div.bs-errors ul { margin-top: 0; margin-bottom: 0; padding-top: 0; padding-bottom: 0; }
