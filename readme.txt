@@ -3,7 +3,7 @@ Contributors: joedolson
 Donate link: http://www.joedolson.com/donate.php
 Tags: botsmasher, spam, anti-spam, captcha, comments, registration, contact form
 Requires at least: 3.4.2
-Tested up to: 3.6.1
+Tested up to: 3.8.0
 Stable tag: 1.0.5
 License: GPLv2 or later
 
@@ -48,6 +48,13 @@ Translating my plug-ins is always appreciated. Visit <a href="http://translate.j
 4. Add your API key on the Settings > BotSmasher screen.
 
 == Changelog ==
+
+= 1.0.6 =
+
+* New filter: bs_custom_field - generate a custom input field.
+* New filter: bs_draw_message - generate a custom response message.
+* Miscellaneous bug fixes.
+* 
 
 = 1.0.5 =
 

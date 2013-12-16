@@ -3,7 +3,7 @@
 Plugin Name: BotSmasher
 Plugin URI: http://www.joedolson.com/articles/botsmasher/
 Description: BotSmasher smashes bots. 
-Version: 1.0.5
+Version: 1.0.6
 Author: Joe Dolson
 Author URI: http://www.joedolson.com/
 
@@ -34,7 +34,7 @@ define( 'BS_DEBUG_TO', get_option( 'admin_email' ) );
 define( 'BS_DEBUGGING', false );
 
 $bs_api_url = 'https://www.botsmasher.com/api/index.php';
-$bs_version = '1.0.5'; 
+$bs_version = '1.0.6'; 
 
 if ( !class_exists('botsmasherClient') ) {
 	require_once( plugin_dir_path(__FILE__).'botsmasherClient.class.php' );
@@ -96,7 +96,7 @@ function bs_plugin_action($links, $file) {
 //Add Plugin Actions to WordPress
 add_filter( 'plugin_action_links', 'bs_plugin_action', -10, 2 );
 add_action( 'admin_enqueue_scripts', 'bs_register_scripts' );
-add_action( 'wp_enqueue_scripts', 'bs_stylesheet' );
+add_action( 'wp_head', 'bs_stylesheet' );
 
 function bs_write_js() {
 	if ( isset($_GET['page']) && $_GET['page']=='botsmasher/botsmasher.php' ) {
@@ -457,7 +457,7 @@ $plugins_string
         <input type='checkbox' name='has_donated' id='has_donated' value='on' /> <label for='has_donated'>".sprintf(__('I have <a href="%1$s">made a donation to help support this plug-in</a>','botsmasher'),'http://www.joedolson.com/donate.php')."</label>
         </p>
         <p>
-        <label for='support_request'>".__('Support Request:','botsmasher')."</label><br /><textarea name='support_request' id='support_request' cols='80' rows='10'>".stripslashes($request)."</textarea>
+        <label for='support_request'>".__('Support Request:','botsmasher')."</label><br /><textarea name='support_request' required aria-required='true' id='support_request' cols='80' rows='10'>".stripslashes($request)."</textarea>
 		</p>
 		<p>
 		<input type='submit' value='".__('Send Support Request','botsmasher')."' name='wpt_support' class='button-primary' />

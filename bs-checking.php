@@ -8,6 +8,7 @@
 * $args array( 'ip'='string', 'email'=>'string', 'name'=>'string', 'action'=>'string' )
 */
 function bs_checker( $args=array() ) {
+	apply_filters("debug", "botsmasher: begin check");
 	extract($args);
 	$result = false; 
 	$bs_options = get_option( 'bs_options' );
@@ -16,7 +17,9 @@ function bs_checker( $args=array() ) {
 	global $bs_api_url;
 	// check the local registry (clears and blacklists) before querying BotSmasher
 	if ( $action = 'check' ) {
+		apply_filters("debug", "botsmasher: begin local check");
 		$result = bs_check_local_registry( array( 'ip'=>$ip,'email'=>$email,'name'=>$name ) );
+		apply_filters("debug", "botsmasher: complete local check");
 	}
 	if ( !$result ) {
 		$bs = new botsmasherClient( $bs_api_url, $bs_options['bs_api_key'] );
@@ -32,6 +35,7 @@ function bs_checker( $args=array() ) {
 		}		
 	}
 	do_action( 'bs_handle_results', $result, $ip, $email, $name, $action );
+	apply_filters("debug", "botsmasher: complete check");
 	return ( $result === 1 || $result === true ) ? true : false;
 }
 

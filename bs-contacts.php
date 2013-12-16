@@ -1,6 +1,23 @@
 <?php
 add_shortcode( 'botsmasher', 'bs_form' );
-
+/* Save submissions as posts.
+add_action( 'bs_post_filter_contact','bs_save_submission', 10, 7 );
+function bs_save_submission( $pd, $recipient, $fields, $labels, $required, $subject, $thanks ) {
+	$my_post = array(
+		'post_title' => wp_strip_all_tags( $subject ),
+		'post_content' => json_encode($pd),
+		'post_status' => 'private',
+		'post_author' => 1,
+		'post_date' => date( 'Y-m-d H:i:00', current_time('timestamp') ),
+		'post_type' => 'bs_saved_post'
+	);
+	$post_id = wp_insert_post( $my_post );
+	add_post_meta( $post_id, '_bs_status', $result );
+	if ( $post_id ) {
+		wp_update_post( array( 'ID'=>$post_id, 'post_name'	=> 'bs_'.$post_id ) );
+	}
+}
+*/
 function bs_form( $atts, $content ) {
 	extract( shortcode_atts( 
 		array( 
@@ -44,6 +61,7 @@ function bs_contact_form( $recipient, $submit, $fields, $labels, $required, $sub
 	$return = bs_submit_form( $_POST, $recipient, $fields, $labels, $required, $subject, $thanks, $template, $recipientname );
 	$message = $return['message'];
 	$message = ( $message ) ? "<div class='bs-notice'>$message</div>" : '';
+	$message = apply_filters( 'bs_post_submit_message', $message, $return );
 	$hash = md5( $recipient.$fields.$labels.$required.$subject.$thanks.$template );
 	if ( is_array( $return['post'] ) ) {
 		$post = $return['post'];
@@ -132,6 +150,8 @@ function bs_contact_form( $recipient, $submit, $fields, $labels, $required, $sub
 
 function bs_create_field( $field, $label, $value, $required, $errors=array() ) {
 	$type = bs_set_type( $field );
+	$custom = apply_filters( 'bs_custom_field', false, $field, $label, $value, $required, $errors, $type );
+	if ( $custom ) { return $custom; }	
 	$options = get_option( 'bs_options' );
 	$value = trim( $value );
 	$is_required = in_array( $field, $required );
@@ -267,10 +287,9 @@ function bs_submit_form( $pd, $recipient, $fields, $labels, $required, $subject,
 					$post['status'] = ' submitted';
 					$post['errors'] = '';
 				}
-				
 				if ( !$template ) { $template = apply_filters( 'bs_custom_template', $default_template, $post, $recipient ); }
 				
-				$message = bs_draw_template( $post, $template );
+				$message = bs_draw_template( $post, apply_filters( 'bs_draw_message', $template, $post ) );
 				$subject = bs_draw_template( $post, $subject );
 				$senderfrom = "From: \"$recipientname\" <$recipient>";
 				$recipientfrom = "From: \"$post[name]\" <$post[email]>";
