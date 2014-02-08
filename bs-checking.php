@@ -67,9 +67,3 @@ function bs_check_local_registry( $args ) {
 	}
 	return false;
 }
-
-add_action( 'init', 'bs_posttypes' );
-function bs_posttypes() {
-	$args = array( 'public' => false ); 
-	register_post_type('bs_flags',$args);
-}

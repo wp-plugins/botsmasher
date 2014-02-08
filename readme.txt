@@ -3,7 +3,7 @@ Contributors: joedolson
 Donate link: http://www.joedolson.com/donate.php
 Tags: botsmasher, spam, anti-spam, captcha, comments, registration, contact form
 Requires at least: 3.4.2
-Tested up to: 3.8.0
+Tested up to: 3.8.1
 Stable tag: 1.0.6
 License: GPLv2 or later
 
@@ -46,6 +46,10 @@ Visit the [BotSmasher translations site](https://www.transifex.com/projects/p/bo
 4. Add your API key on the Settings > BotSmasher screen.
 
 == Changelog ==
+
+= 1.0.7 =
+
+* 
 
 = 1.0.6 =
 

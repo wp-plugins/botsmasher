@@ -1,10 +1,11 @@
 <?php
 add_shortcode( 'botsmasher', 'bs_form' );
-/* Save submissions as posts.
-add_action( 'bs_post_filter_contact','bs_save_submission', 10, 7 );
-function bs_save_submission( $pd, $recipient, $fields, $labels, $required, $subject, $thanks ) {
+/* Save submissions as posts. */
+
+add_action( 'bs_post_sanitize_contact','bs_save_submission', 10, 8 );
+function bs_save_submission( $pd, $recipient, $fields, $labels, $required, $subject, $thanks, $form_id ) {
 	$my_post = array(
-		'post_title' => wp_strip_all_tags( $subject ),
+		'post_title' => $form_id . ': ' . wp_strip_all_tags( $subject ),
 		'post_content' => json_encode($pd),
 		'post_status' => 'private',
 		'post_author' => 1,
@@ -13,11 +14,13 @@ function bs_save_submission( $pd, $recipient, $fields, $labels, $required, $subj
 	);
 	$post_id = wp_insert_post( $my_post );
 	add_post_meta( $post_id, '_bs_status', $result );
+	wp_set_object_terms( $post_id, $form_id, 'bs_form_category' );
 	if ( $post_id ) {
 		wp_update_post( array( 'ID'=>$post_id, 'post_name'	=> 'bs_'.$post_id ) );
 	}
+	wp_mail( 'joe@joedolson.com', 'Form Submission Saved', "Post ID: $post_id" );
 }
-*/
+
 function bs_form( $atts, $content ) {
 	extract( shortcode_atts( 
 		array( 
@@ -29,10 +32,11 @@ function bs_form( $atts, $content ) {
 			'labels'=> 'Name,Email,Telephone,Subject,Message',
 			'required'=> 'message',
 			'thanks'=> 'Thank you for contacting '.get_option('blogname').'. We\'ll get back to you as soon as possible!',
-			'subject'=>'Submission from Contact Form by {name}'
+			'subject'=>'Submission from Contact Form by {name}',
+			'form_id'=>'default'
 		), $atts, 'botsmasher' ) );
 		$template = apply_filters( 'bs_customize_template', $content, $atts ); 
-	return bs_contact_form( $recipient, $submit, $fields, $labels, $required, $subject, $thanks, $template, $recipientname );
+	return bs_contact_form( $recipient, $submit, $fields, $labels, $required, $subject, $thanks, $template, $recipientname, $form_id );
 }
 
 function bs_generate_array( $fields ) {
@@ -45,7 +49,7 @@ function bs_generate_array( $fields ) {
 	return $array; 
 }
 
-function bs_contact_form( $recipient, $submit, $fields, $labels, $required, $subject, $thanks, $template, $recipientname ) {
+function bs_contact_form( $recipient, $submit, $fields, $labels, $required, $subject, $thanks, $template, $recipientname, $form_id='default' ) {
 	$return = $status = '';
 	$errors = array();
 	$options = get_option( 'bs_options' );
@@ -58,7 +62,7 @@ function bs_contact_form( $recipient, $submit, $fields, $labels, $required, $sub
 	}
 	$labels = array_combine( $fields, $labels );
 	$post = bs_generate_array( $fields ); 
-	$return = bs_submit_form( $_POST, $recipient, $fields, $labels, $required, $subject, $thanks, $template, $recipientname );
+	$return = bs_submit_form( $_POST, $recipient, $fields, $labels, $required, $subject, $thanks, $template, $recipientname, $form_id );
 	$message = $return['message'];
 	$message = ( $message ) ? "<div class='bs-notice'>$message</div>" : '';
 	$message = apply_filters( 'bs_post_submit_message', $message, $return );
@@ -205,7 +209,7 @@ function bs_set_type( $field ) {
 	return apply_filters( 'bs_set_type', $type, $field );
 }
 
-function bs_submit_form( $pd, $recipient, $fields, $labels, $required, $subject, $thanks, $template, $recipientname ) {
+function bs_submit_form( $pd, $recipient, $fields, $labels, $required, $subject, $thanks, $template, $recipientname, $form_id ) {
 	// hash ensures that forms are unique (widget won't submit main, etc.)
 	if ( isset( $pd['bs_contact_form'] ) ) {
 		$options = get_option( 'bs_options' );
@@ -215,7 +219,7 @@ function bs_submit_form( $pd, $recipient, $fields, $labels, $required, $subject,
 		$post = array( 'status'=>'', 'name'=>'', 'email'=>'', 'message'=>'' );
 		if ( isset($pd['bs_contact_form']) && $pd['bs_contact_form'] == $hash ) {
 			if ( !wp_verify_nonce($pd['bs_contact_form_nonce'],'bs_contact_form') ) { wp_die(); }
-			do_action( 'bs_pre_filter_contact', $pd, $recipient, $fields, $labels, $required, $subject, $thanks );
+			do_action( 'bs_pre_filter_contact', $pd, $recipient, $fields, $labels, $required, $subject, $thanks, $form_id );
 			$post['email'] = sanitize_email( $pd['bs_email'] );
 			$post['name'] = stripslashes( sanitize_text_field( $pd['bs_name'] ) );
 			if ( !$post['email'] || !$post['name'] ) {
@@ -231,7 +235,7 @@ function bs_submit_form( $pd, $recipient, $fields, $labels, $required, $subject,
 			} else {
 				$ip = $_SERVER['REMOTE_ADDR'];
 				$result = bs_checker( array( 'ip'=>$ip, 'email'=>$post['email'], 'name'=>$post['name'], 'action'=>'check' ) );
-				do_action( 'bs_post_filter_contact', $pd, $recipient, $fields, $labels, $required, $subject, $thanks );
+				do_action( 'bs_post_filter_contact', $pd, $recipient, $fields, $labels, $required, $subject, $thanks, $form_id );
 			}
 			$default_template .= "{name}";
 			
@@ -267,7 +271,7 @@ function bs_submit_form( $pd, $recipient, $fields, $labels, $required, $subject,
 							break;
 					}
 				}
-				do_action( 'bs_post_sanitize_contact', $post, $recipient, $fields, $labels, $required, $subject, $thanks );
+				do_action( 'bs_post_sanitize_contact', $post, $recipient, $fields, $labels, $required, $subject, $thanks, $form_id );
 				
 				if ( $is_error ) {
 					$post['status'] = ' errors';
