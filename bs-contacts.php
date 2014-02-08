@@ -18,7 +18,6 @@ function bs_save_submission( $pd, $recipient, $fields, $labels, $required, $subj
 	if ( $post_id ) {
 		wp_update_post( array( 'ID'=>$post_id, 'post_name'	=> 'bs_'.$post_id ) );
 	}
-	wp_mail( 'joe@joedolson.com', 'Form Submission Saved', "Post ID: $post_id" );
 }
 
 function bs_form( $atts, $content ) {

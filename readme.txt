@@ -49,7 +49,7 @@ Visit the [BotSmasher translations site](https://www.transifex.com/projects/p/bo
 
 = 1.0.7 =
 
-* 
+* Save contact form submissions.
 
 = 1.0.6 =
 
