@@ -460,7 +460,7 @@ $plugins_string
 		<code>".__('From:','botsmasher')." \"$current_user->display_name\" &lt;$current_user->user_email&gt;</code>
 		</p>
 		<p>
-		<input type='checkbox' name='has_read_faq' id='has_read_faq' value='on' /> <label for='has_read_faq'>".sprintf(__('I have read <a href="%1$s">the FAQ for this plug-in</a> <span>(required)</span>','botsmasher'),'http://wordpress.org/plugins/botsmasher/faq/')."</label>
+		<input type='checkbox' name='has_read_faq' id='has_read_faq' value='on' required='required' aria-required='true' /> <label for='has_read_faq'>".sprintf(__('I have read <a href="%1$s">the FAQ for this plug-in</a> <span>(required)</span>','botsmasher'),'http://wordpress.org/plugins/botsmasher/faq/')."</label>
         </p>
         <p>
         <input type='checkbox' name='has_donated' id='has_donated' value='on' /> <label for='has_donated'>".sprintf(__('I have <a href="%1$s">made a donation to help support this plug-in</a>','botsmasher'),'http://www.joedolson.com/donate.php')."</label>

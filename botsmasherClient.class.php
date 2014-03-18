@@ -122,7 +122,7 @@ class botsmasherClient {
         $array = json_decode($this -> response, TRUE);
 
         try {
-            if (is_null($array)) {
+            if ( is_null( $array ) ) {
                 switch (json_last_error()) {
                     case JSON_ERROR_DEPTH :
                         $msg = 'Maximum stack depth exceeded';
