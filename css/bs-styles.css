@@ -1,0 +1,13 @@
+/* Admin styles for BotSmasher */
+#bs_settings_page .postbox { margin: 0 10px 10px 0;	}
+#bs_settings_page .meta-box-sortables { min-height: 0; }
+#bs_settings_page legend { font-weight: 700; }
+.column-botsmasher { width: 8em; }
+.botsmasher { text-align: center; }
+.botsmasher tr label { position: absolute; left: -999em; }
+.bs-widget legend { padding: 0 0 10px; font-weight: 700; }
+.shortcode {padding: 5px; background: #fefefa; outline: 1px solid #e0e0e0; margin: 0 0 10px; font-family: monospace; }
+.shortcode strong { font-family: sans-serif; }
+.bs_api_usage { background: #fff; padding: 2px 10px; border-radius: 5px; font-size: 1.2em; }
+.bs-widget .prime p { width: 49%; float: left; }
+.bs-widget .prime p:nth-of-type(odd) { margin-right: 5px; }
