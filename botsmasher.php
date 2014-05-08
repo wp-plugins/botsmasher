@@ -3,7 +3,7 @@
 Plugin Name: BotSmasher
 Plugin URI: http://www.joedolson.com/articles/botsmasher/
 Description: BotSmasher smashes bots. 
-Version: 1.0.7
+Version: 1.1.0
 Author: Joe Dolson
 Author URI: http://www.joedolson.com/
 
@@ -34,7 +34,7 @@ define( 'BS_DEBUG_TO', get_option( 'admin_email' ) );
 define( 'BS_DEBUGGING', false );
 
 $bs_api_url = 'https://www.botsmasher.com/api/index.php';
-$bs_version = '1.0.7'; 
+$bs_version = '1.1.0'; 
 
 if ( !class_exists('botsmasherClient') ) {
 	require_once( plugin_dir_path(__FILE__).'botsmasherClient.class.php' );
