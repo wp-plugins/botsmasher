@@ -1,7 +1,7 @@
 === BotSmasher ===
 Contributors: joedolson
 Donate link: http://www.joedolson.com/donate.php
-Tags: botsmasher, spam, anti-spam, captcha, comments, registration, filtering, contact form, form builder
+Tags: botsmasher, spam, anti-spam, captcha, comments, registration, filtering, contact form, form builder, forms
 Requires at least: 3.4.2
 Tested up to: 3.9.1
 Stable tag: 1.1.0
