@@ -55,8 +55,90 @@ add_action( 'init', 'bs_posttypes' );
 function bs_posttypes() {
 	$args = array( 'public' => false ); 
 	register_post_type( 'bs_flags',$args );
+	$value = array( 
+			__( 'message','botsmasher' ),
+			__( 'messages','botsmasher' ),
+			__( 'Message','botsmasher' ),
+			__( 'Messages','botsmasher' ),
+		);
+		$labels = array(
+		'name' => $value[3],
+		'singular_name' => $value[2],
+		'add_new' => __( 'Add New' , 'botsmasher' ),
+		'add_new_item' => sprintf( __( 'Create New %s','botsmasher' ), $value[2] ),
+		'edit_item' => sprintf( __( 'Modify %s','botsmasher' ), $value[2] ),
+		'new_item' => sprintf( __( 'New %s','botsmasher' ), $value[2] ),
+		'view_item' => sprintf( __( 'View %s','botsmasher' ), $value[2] ),
+		'search_items' => sprintf( __( 'Search %s','botsmasher' ), $value[3] ),
+		'not_found' =>  sprintf( __( 'No %s found','botsmasher' ), $value[1] ),
+		'not_found_in_trash' => sprintf( __( 'No %s found in Trash','botsmasher' ), $value[1] ), 
+		'parent_item_colon' => ''
+	);
+	$args = array(
+		'labels' => $labels,
+		'public' => false,
+		'show_ui' => true,
+		'show_in_menu' => true,
+		'menu_icon' => 'dashicons-email',
+		'supports' => array( 'title', 'custom-fields' ),
+		'taxonomies' => array( 'bs_form_category' )
+	); 
 	register_post_type( 'bs_saved_post',$args );
-	register_taxonomy( 'bs_form_category', 'bs_saved_post', array( 'public'=>false ) );
+}
+
+add_action( 'admin_menu', 'bs_add_outer_box' );
+
+// begin add boxes
+function bs_add_outer_box() {
+	add_meta_box( 'bs_custom_div',__('BotSmasher Submission','botsmasher'), 'bs_add_inner_box', 'bs_saved_post', 'normal','high' );			
+}
+function bs_add_inner_box() {
+	global $post;
+	$content = '';
+	$data = json_decode( stripslashes( $post->post_content ) );
+	foreach ( $data as $key => $value ) {
+		$value = str_replace( 'rnrn', '<br /><br />', $value );
+		$content .= "<p><strong>".ucfirst($key)."</strong>:<br /> $value</p>";
+	}
+	$content .= "<h2>".__('JSON Submission Data','botsmasher').":</h2><code>".stripslashes( $post->post_content )."</code>";
+	echo '<div class="bs_post_fields">'.$content.'</div>';
+}
+
+
+function bs_column($cols) {
+	$cols['bs_submitter'] = __('Sender','botsmasher');
+	$cols['bs_form_id'] = __('Form ID','botsmasher');
+	return $cols;
+}
+
+// Echo the ID for the new column
+function bs_custom_column( $column_name, $id ) {
+	switch ( $column_name ) {
+		case 'bs_submitter' :
+			$email = get_post_meta( $id, '_bs_submitter_email', true );		
+			$name = get_post_meta( $id, '_bs_submitter_name',true );
+			$link = "<a href='mailto:$email'>$name</a>";
+			echo $link;
+		break;
+		case 'bs_form_id' :
+			$form = get_post_meta( $id, '_bs_form_id', true );
+			echo $form;
+		break;
+	}
+}
+
+function bs_return_value( $value, $column_name, $id ) {
+	if ( $column_name == 'bs_form_id' || $column_name == 'bs_submitter' ) {
+		$value = $id;
+	}
+	return $value;
+}
+
+// Actions/Filters for message tables and css output
+add_action('admin_init', 'bs_add');
+function bs_add() {
+	add_filter( "manage_bs_saved_post_posts_columns", 'bs_column' );			
+	add_action( "manage_bs_saved_post_posts_custom_column", 'bs_custom_column', 10, 2 );
 }
 
 /* 

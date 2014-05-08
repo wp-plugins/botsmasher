@@ -98,7 +98,9 @@ class botsmasherClient {
 				// If so, remove appended error so data is parseable.
 				$parts = explode( '}}}}', $body );
 				$body = $parts[0].'}}}}';
-
+				if ( !json_decode( $body ) ) {
+					$body = $parts[0];
+				}
 			} 
 		} else {
 			bs_handle_exception( $result, 'is_wp_error' );
@@ -115,40 +117,42 @@ class botsmasherClient {
      */
     public function decode() {
         // if there's no response then there's nothing to decode
-        if ((FALSE == $this -> response) || (!isset($this -> response))) {
+        if ( ( FALSE == $this->response ) || ( !isset( $this->response ) ) ) {
             return FALSE;
         }
 		
-        $array = json_decode($this -> response, TRUE);
-
-        try {
-            if ( is_null( $array ) ) {
-                switch (json_last_error()) {
-                    case JSON_ERROR_DEPTH :
-                        $msg = 'Maximum stack depth exceeded';
-                        break;
-                    case JSON_ERROR_STATE_MISMATCH :
-                        $msg = 'Underflow or the modes mismatch';
-                        break;
-                    case JSON_ERROR_CTRL_CHAR :
-                        $msg = 'Unexpected control character found';
-                        break;
-                    case JSON_ERROR_SYNTAX :
-                        $msg = 'Syntax error, malformed JSON';
-                        break;
-                    case JSON_ERROR_UTF8 :
-                        $msg = 'Malformed UTF-8 characters, possibly incorrectly encoded';
-                        break;
-                    default :
-                        $msg = 'Unknown error';
-                        break;
-                }
-                throw new Exception($msg);
-            }
-        } catch (Exception $e) {
-			bs_handle_exception( $e, $this->response );
-            return FALSE;
-        }
+        $array = json_decode( $this->response, TRUE );
+		
+		if ( function_exists( 'json_last_error' ) ) {
+			try {
+				if ( is_null( $array ) ) {
+					switch (json_last_error()) {
+						case JSON_ERROR_DEPTH :
+							$msg = 'Maximum stack depth exceeded';
+							break;
+						case JSON_ERROR_STATE_MISMATCH :
+							$msg = 'Underflow or the modes mismatch';
+							break;
+						case JSON_ERROR_CTRL_CHAR :
+							$msg = 'Unexpected control character found';
+							break;
+						case JSON_ERROR_SYNTAX :
+							$msg = 'Syntax error, malformed JSON';
+							break;
+						case JSON_ERROR_UTF8 :
+							$msg = 'Malformed UTF-8 characters, possibly incorrectly encoded';
+							break;
+						default :
+							$msg = 'Unknown error';
+							break;
+					}
+					throw new Exception($msg);
+				}
+			} catch (Exception $e) {
+				bs_handle_exception( $e, $this->response );
+				return FALSE;
+			}
+		}
         return $array;
     }
 

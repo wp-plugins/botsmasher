@@ -2,19 +2,24 @@
 add_shortcode( 'botsmasher', 'bs_form' );
 /* Save submissions as posts. */
 
-add_action( 'bs_post_sanitize_contact','bs_save_submission', 10, 8 );
-function bs_save_submission( $pd, $recipient, $fields, $labels, $required, $subject, $thanks, $form_id ) {
+add_action( 'bs_post_sanitize_contact','bs_save_submission', 10, 9 );
+function bs_save_submission( $pd, $recipient, $fields, $labels, $required, $subject, $thanks, $form_id, $result ) {
+	if ( $form_id == 'default' ) { $form_name = "Default Form"; } else { $form_name = $form_id; }
 	$my_post = array(
-		'post_title' => $form_id . ': ' . wp_strip_all_tags( $subject ),
+		'post_title' => bs_draw_template( $pd, wp_strip_all_tags( $subject ) ),
 		'post_content' => json_encode($pd),
 		'post_status' => 'private',
 		'post_author' => 1,
 		'post_date' => date( 'Y-m-d H:i:00', current_time('timestamp') ),
-		'post_type' => 'bs_saved_post'
+		'post_type' => apply_filters( 'bs_saved_post_type', 'bs_saved_post', $form_id )
 	);
 	$post_id = wp_insert_post( $my_post );
 	add_post_meta( $post_id, '_bs_status', $result );
-	wp_set_object_terms( $post_id, $form_id, 'bs_form_category' );
+	add_post_meta( $post_id, '_bs_form_id', $form_name );
+	add_post_meta( $post_id, '_bs_submitter_name', $pd['name'] );
+	add_post_meta( $post_id, '_bs_submitter_email', $pd['email'] );
+	// for pushing data into custom fields
+	do_action( 'bs_save_fields', $post_id, $pd );
 	if ( $post_id ) {
 		wp_update_post( array( 'ID'=>$post_id, 'post_name'	=> 'bs_'.$post_id ) );
 	}
@@ -96,10 +101,10 @@ function bs_contact_form( $recipient, $submit, $fields, $labels, $required, $sub
 				<div><input type='hidden' name='bs_contact_form' value='$hash' />".
 				wp_nonce_field('bs_contact_form','bs_contact_form_nonce',false,false)."</div>
 				<p>$error_name
-					<label for='bs_name'>$labels[name] $lr</label> <input$aria_name aria-required='true' required type='text' name='bs_name' id='bs_name' value='".trim($post['name'])."' placeholder='Your name' />
+					<label for='bs_name'>$labels[name] $lr</label> <input$aria_name aria-required='true' required type='text' name='bs_name' id='bs_name' value='".trim( esc_attr( stripslashes( $post['name'] ) ) )."' placeholder='Your name' />
 				</p>
 				<p>$error_email
-					<label for='bs_email'>$labels[email] $lr</label> <input$aria_email aria-required='true' required type='text' name='bs_email' id='bs_email' value='".trim($post['email'])."' placeholder=\"Email Address\" />
+					<label for='bs_email'>$labels[email] $lr</label> <input$aria_email aria-required='true' required type='text' name='bs_email' id='bs_email' value='".trim( esc_attr( stripslashes( $post['email'] ) ) )."' placeholder=\"Email Address\" />
 				</p>";
 				foreach ( $fields as $value ) {
 					switch ($value) {
@@ -169,13 +174,12 @@ function bs_create_field( $field, $label, $value, $required, $errors=array() ) {
 	} else { 
 		$required = ''; $lr = '';
 	}
-	$place = ( $value != '' ) ? $value : $label;
 	if ( $type == 'textarea' ) {
-		$output = "<p class='$field'>$error<label for='bs_$field'>$label $lr</label> <textarea$aria name='bs_$field' id='bs_$field' $required>$value</textarea></p>";	
+		$output = "<p class='$field'>$error<label for='bs_$field'>$label $lr</label> <textarea$aria name='bs_$field' id='bs_$field' $required>".esc_textarea( stripslashes( $value ) )."</textarea></p>";	
 	} else if ( $type == 'number' ) {
-		$output = "<p class='$field'>$error<label for='bs_$field'>$label $lr</label> <input$aria type='$type' name='bs_$field' id='bs_$field' value='$value' $required /></p>";
+		$output = "<p class='$field'>$error<label for='bs_$field'>$label $lr</label> <input$aria type='$type' name='bs_$field' id='bs_$field' value='".esc_attr( stripslashes( $value ) )."' $required /></p>";
 	} else {
-		$output = "<p class='$field'>$error<label for='bs_$field'>$label $lr</label> <input$aria type='$type' name='bs_$field' id='bs_$field' value='$value' placeholder='$place' $required /></p>";	
+		$output = "<p class='$field'>$error<label for='bs_$field'>$label $lr</label> <input$aria type='$type' name='bs_$field' id='bs_$field' value='".esc_attr( stripslashes( $value ) )."' placeholder='$label' $required /></p>";	
 	}
 	return $output;
 }
@@ -226,7 +230,6 @@ function bs_submit_form( $pd, $recipient, $fields, $labels, $required, $subject,
 					$is_error = true;
 					$errors['name'] = array( 'label'=>$labels['name'], 'name'=>'name', 'post'=>'' );
 				}
-				$default_template .= "\n{email}";
 				if ( empty( $post['email'] ) ) {
 					$is_error = true;
 					$errors['email'] = array( 'label'=>$labels['email'], 'name'=>'email', 'post'=>'' );
@@ -235,20 +238,19 @@ function bs_submit_form( $pd, $recipient, $fields, $labels, $required, $subject,
 				$ip = $_SERVER['REMOTE_ADDR'];
 				$result = bs_checker( array( 'ip'=>$ip, 'email'=>$post['email'], 'name'=>$post['name'], 'action'=>'check' ) );
 				do_action( 'bs_post_filter_contact', $pd, $recipient, $fields, $labels, $required, $subject, $thanks, $form_id );
-			}
-			$default_template .= "{name}";
+			}			
 			
 			if ( $result ) { // this is spam!
 				return array( 'message'=>__( 'BotSmasher thinks you\'re a spammer. Please contact us if you\'re a real person!', 'botsmasher' ), 'post'=>$post );
 			} else {
 				foreach ( $fields as $value ) {
-					switch ($value) {
+					switch ( $value ) {
 						case 'number':
-							$val = ( is_numeric( $pd["bs_$value"] ) )?$pd["bs_$value"]:false;
+							$val = ( is_numeric( $pd["bs_$value"] ) ) ? $pd["bs_$value"] : false;
 							$val = apply_filters( "bs_sanitize_$value", $val, $labels[$value] );
 							if ( $val ) {
 								$post[$value] = $val;
-								$default_template .= "\n{".$value."}";
+								$default_template .= "\n".ucfirst($value).": {".$value."}";
 							} else {
 								if ( in_array( $value, $required ) ) {
 									$is_error = true; 
@@ -257,10 +259,14 @@ function bs_submit_form( $pd, $recipient, $fields, $labels, $required, $subject,
 							}
 							break;					
 						default:
-							$val = apply_filters( "bs_sanitize_$value", sanitize_text_field( $pd["bs_$value"] ), $labels[$value] );
+							if ( $options['bs_html_email'] == 'on' ) {
+								$val = apply_filters( "bs_sanitize_$value", htmlspecialchars( $pd["bs_$value"] ), $labels[$value] );
+							} else {
+								$val = apply_filters( "bs_sanitize_$value", $pd["bs_$value"], $labels[$value] );
+							}
 							if ( $val ) {
 								$post[$value] = $val;
-								$default_template .= "\n{".$value."}";
+								$default_template .= "\n".ucfirst($value).": {".$value."}";
 							} else {
 								if ( in_array( $value, $required ) ) {
 									$is_error = true; 
@@ -270,7 +276,6 @@ function bs_submit_form( $pd, $recipient, $fields, $labels, $required, $subject,
 							break;
 					}
 				}
-				do_action( 'bs_post_sanitize_contact', $post, $recipient, $fields, $labels, $required, $subject, $thanks, $form_id );
 				
 				if ( $is_error ) {
 					$post['status'] = ' errors';
@@ -290,18 +295,21 @@ function bs_submit_form( $pd, $recipient, $fields, $labels, $required, $subject,
 					$post['status'] = ' submitted';
 					$post['errors'] = '';
 				}
+				
+				do_action( 'bs_post_sanitize_contact', $post, $recipient, $fields, $labels, $required, $subject, $thanks, $form_id, $result );
+				
 				if ( !$template ) { $template = apply_filters( 'bs_custom_template', $default_template, $post, $recipient ); }
 				
 				$message = bs_draw_template( $post, apply_filters( 'bs_draw_message', $template, $post ) );
 				$subject = bs_draw_template( $post, $subject );
-				$senderfrom = "From: \"$recipientname\" <$recipient>";
-				$recipientfrom = "From: \"$post[name]\" <$post[email]>";
+				$senderfrom = "From: \"".stripslashes( $recipientname )."\" <$recipient>";
+				$recipientfrom = "From: \"".stripslashes( $post['name'] )."\" <$post[email]>";
 				
 				if ( $options['bs_html_email'] == 'on' ) {
 					add_filter('wp_mail_content_type',create_function('', 'return "text/html";'));
 				}
-				wp_mail( $post['email'], $subject, $message, $senderfrom );
-				wp_mail( $recipient, $subject, $message, $recipientfrom );
+				wp_mail( $post['email'], stripslashes( $subject ), $message, $senderfrom );
+				wp_mail( $recipient, stripslashes( $subject ), $message, $recipientfrom );
 				if ( $options['bs_html_email'] == 'on' ) {
 					remove_filter('wp_mail_content_type',create_function('', 'return "text/html";'));
 				}			
@@ -520,27 +528,29 @@ function bs_options( $selected='text' ) {
 	return $return;
 }
 
-function bs_draw_template( $array='',$template='' ) {
+function bs_draw_template( $array=array(),$template='' ) {
 	//1st argument: array of details
 	//2nd argument: template to print details into
-	$template = stripcslashes($template);
-	foreach ($array as $key=>$value) {
-		if ( !is_object($value) ) {
-			if ( strpos( $template, "{".$key ) !== false ) { // only check for tag parts that exist
-				preg_match_all('/{'.$key.'\b(?>\s+(?:before="([^"]*)"|after="([^"]*)"|fallback="([^"]*)")|[^\s]+|\s+){0,2}}/', $template, $matches, PREG_PATTERN_ORDER );
-				if ( $matches ) {
-					$before = ( isset( $matches[1][0] ) )?$matches[1][0]:'';
-					$after = ( isset( $matches[2][0] ) )?$matches[2][0]:'';
-					$fallback = @$matches[3][0];
-					$fb = ( $fallback != '' && $value == '' )?$before.$fallback.$after:'';
-					$value = ( $value == '' )?$fb:$before.$value.$after;
-					$whole_thang = ( isset( $matches[0][0] ) )?$matches[0][0]:'';
-					$template = str_replace( $whole_thang, $value, $template );
+	$template = stripcslashes( $template );
+	if ( is_array( $array ) ) {
+		foreach ($array as $key=>$value) {
+			if ( !is_object($value) ) {
+				if ( strpos( $template, "{".$key ) !== false ) { // only check for tag parts that exist
+					preg_match_all('/{'.$key.'\b(?>\s+(?:before="([^"]*)"|after="([^"]*)"|fallback="([^"]*)")|[^\s]+|\s+){0,2}}/', $template, $matches, PREG_PATTERN_ORDER );
+					if ( $matches ) {
+						$before = ( isset( $matches[1][0] ) )?$matches[1][0]:'';
+						$after = ( isset( $matches[2][0] ) )?$matches[2][0]:'';
+						$fallback = @$matches[3][0];
+						$fb = ( $fallback != '' && $value == '' )?$before.$fallback.$after:'';
+						$value = ( $value == '' )?$fb:$before.$value.$after;
+						$whole_thang = ( isset( $matches[0][0] ) )?$matches[0][0]:'';
+						$template = str_replace( $whole_thang, $value, $template );
+					}
 				}
-			}
-		} 
+			} 
+		}
 	}
-	return stripslashes( trim( mc_clean_template($template) ) );
+	return stripslashes( trim( bs_clean_template($template) ) );
 }
 // function cleans unreplaced template tags out of the template. 
 // Necessary for custom fields, which do not exist in array if empty.
@@ -549,7 +559,7 @@ function bs_clean_template( $template ) {
 
 	if ( $matches ) {
 		foreach ( $matches[0] as $match ) {
-		$template = str_replace( $match, '', $template );
+			$template = str_replace( $match, '', $template );
 		}
 	}
 	return $template;

@@ -1,9 +1,9 @@
 === BotSmasher ===
 Contributors: joedolson
 Donate link: http://www.joedolson.com/donate.php
-Tags: botsmasher, spam, anti-spam, captcha, comments, registration, contact form
+Tags: botsmasher, spam, anti-spam, captcha, comments, registration, filtering, contact form, form builder
 Requires at least: 3.4.2
-Tested up to: 3.8.1
+Tested up to: 3.9.1
 Stable tag: 1.0.6
 License: GPLv2 or later
 
@@ -27,12 +27,12 @@ New registrations are run through BotSmasher. Anybody flagged by BotSmasher will
 
 = Contact Form =
 
-BotSmasher includes an integrated and accessible contact form with basic customization options. The contact form shortcode is documented on the settings page, but can also be configured via the widget tool. Customize styles by placing a stylesheet called 'bs-form.css' in your theme or child theme directory.
+BotSmasher includes an integrated and accessible contact form with basic customization options. The contact form shortcode is documented on the settings page, but can also be configured via the widget tool. Customize styles by placing a stylesheet called 'bs-form.css' in your theme or child theme directory. Form submissions are automatically saved as a non-public custom post type.
 
 = Translations =
 
 Available languages (in order of completeness):
-There aren't any yet!
+German, Portuguese, Dutch, French
 
 Visit the [BotSmasher translations site](https://www.transifex.com/projects/p/botsmasher/) to help out!
 
@@ -47,9 +47,18 @@ Visit the [BotSmasher translations site](https://www.transifex.com/projects/p/bo
 
 == Changelog ==
 
-= 1.0.7 =
+= 1.1.0 =
 
-* Save contact form submissions.
+* Feature: Save contact form submissions as custom post type.
+* Bug fix: Placeholder field should always hold label value.
+* Bug fix: stripslashes on post-submission field content.
+* Bug fix: Don't strip line breaks from multi-line fields.
+* Bug fix: Stripslashes from recipient name on email.
+* Bug fix: Don't add name and email fields twice to default email template.
+* Bug fix: called invalid function on contact form submission
+* Bug fix: Check if json_last_error exists
+* Bug fix: better clean up on server response if invalid.
+* Added: French, German, Dutch and Brazilian Portuguese translations
 
 = 1.0.6 =
 
