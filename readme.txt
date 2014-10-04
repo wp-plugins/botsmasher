@@ -47,6 +47,10 @@ Visit the [BotSmasher translations site](https://www.transifex.com/projects/p/bo
 
 == Changelog ==
 
+= 1.1.1 =
+
+* Bug fix: Use reply-to header instead of from header in support messages & contact form messages.
+
 = 1.1.0 =
 
 * Feature: Save contact form submissions as custom post type.

@@ -1,13 +1,13 @@
 <?php
 /*
 Plugin Name: BotSmasher
-Plugin URI: http://www.joedolson.com/articles/botsmasher/
+Plugin URI: http://www.joedolson.com/botsmasher/
 Description: BotSmasher smashes bots. 
 Version: 1.1.0
 Author: Joe Dolson
 Author URI: http://www.joedolson.com/
 
-    Copyright 2013 Joe Dolson (joe@joedolson.com)
+    Copyright 2013-2014 Joe Dolson (joe@joedolson.com)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -451,20 +451,12 @@ get_currentuserinfo();
 	$php_version = phpversion();
 	
 	// theme data
-	if ( function_exists( 'wp_get_theme' ) ) {
 	$theme = wp_get_theme();
-		$theme_name = $theme->Name;
-		$theme_uri = $theme->ThemeURI;
-		$theme_parent = $theme->Template;
-		$theme_version = $theme->Version;	
-	} else {
-	$theme_path = get_stylesheet_directory().'/style.css';
-	$theme = get_theme_data($theme_path);
-		$theme_name = $theme['Name'];
-		$theme_uri = $theme['ThemeURI'];
-		$theme_parent = $theme['Template'];
-		$theme_version = $theme['Version'];
-	}
+	$theme_name = $theme->Name;
+	$theme_uri = $theme->ThemeURI;
+	$theme_parent = $theme->Template;
+	$theme_version = $theme->Version;	
+
 	// plugin data
 	$plugins = get_plugins();
 	$plugins_string = '';
@@ -512,7 +504,13 @@ $plugins_string
 		$has_read_faq = ( $_POST['has_read_faq'] == 'on')?"Read FAQ":false;
 		$subject = "BotSmasher support request. $has_donated";
 		$message = $request ."\n\n". $data;
-		$from = "From: \"$current_user->display_name\" <$current_user->user_email>\r\n";
+		// Get the site domain and get rid of www. from pluggable.php
+		$sitename = strtolower( $_SERVER['SERVER_NAME'] );
+		if ( substr( $sitename, 0, 4 ) == 'www.' ) {
+				$sitename = substr( $sitename, 4 );
+		}
+		$from_email = 'wordpress@' . $sitename;		
+		$from = "From: \"$current_user->display_name\" <$from_email>\r\nReply-to: \"$current_user->display_name\" <$current_user->user_email>\r\n";
 
 		if ( !$has_read_faq ) {
 			echo "<div class='message error'><p>".__('Please read the FAQ and other Help documents before making a support request.','botsmasher')."</p></div>";
@@ -539,7 +537,7 @@ $plugins_string
 		."</p>";
 		echo "
 		<p>
-		<code>".__('From:','botsmasher')." \"$current_user->display_name\" &lt;$current_user->user_email&gt;</code>
+		<code>".__('Reply-to:','botsmasher')." \"$current_user->display_name\" &lt;$current_user->user_email&gt;</code>
 		</p>
 		<p>
 		<input type='checkbox' name='has_read_faq' id='has_read_faq' value='on' required='required' aria-required='true' /> <label for='has_read_faq'>".sprintf(__('I have read <a href="%1$s">the FAQ for this plug-in</a> <span>(required)</span>','botsmasher'),'http://wordpress.org/plugins/botsmasher/faq/')."</label>
@@ -556,7 +554,7 @@ $plugins_string
 		<p>".
 		__('The following additional information will be sent with your support request:','botsmasher')
 		."</p>
-		<div class='mc_support'>
+		<div class='bs_support'>
 		".wpautop($data)."
 		</div>
 		</div>
