@@ -7,7 +7,7 @@ Version: 1.1.0
 Author: Joe Dolson
 Author URI: http://www.joedolson.com/
 
-    Copyright 2013-2014 Joe Dolson (joe@joedolson.com)
+    Copyright 2013-2015 Joe Dolson (joe@joedolson.com)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -394,7 +394,7 @@ From : {name} ({email})
 					<p class='botsmasher'><a href="http://www.botsmasher.com"><img src="<?php echo plugins_url('imgs/logo.png', __FILE__ ); ?>" alt="BotSmasher" /></a></p>
 					<p>
 					<a href="https://twitter.com/intent/tweet?screen_name=joedolson&text=BotSmasher%20rocks!" class="twitter-mention-button" data-size="large" data-related="joedolson">Tweet to @joedolson</a>
-					<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+					<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if (!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 					</p>
 					<p><?php _e("If you've found BotSmasher useful, then please consider <a href='http://wordpress.org/extend/plugins/botsmasher/'>rating it five stars</a>, <a href='http://www.joedolson.com/donate.php'>making a donation</a>, or <a href='http://translate.joedolson.com/projects/botsmasher'>helping with translation</a>.",'botsmasher'); ?></p>
 							<div>

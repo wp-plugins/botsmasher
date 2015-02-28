@@ -50,6 +50,7 @@ Visit the [BotSmasher translations site](https://www.transifex.com/projects/p/bo
 = 1.1.1 =
 
 * Bug fix: Use reply-to header instead of from header in support messages & contact form messages.
+* Strip HTML from value of email address to send to.
 
 = 1.1.0 =
 
